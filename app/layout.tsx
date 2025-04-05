@@ -28,6 +28,12 @@ export default function RootLayout({
         <meta name="keywords" content="AI chat, AI character roleplay, AI companions, AI chatbots, Character.ai, ChatGPT, Claude, AI conversation, virtual characters, AI directory, AI character chat directory" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://aidirectory.example.com" />
+        <link rel="icon" href="/logo.ico" />
+        <link rel="apple-touch-icon" href="/logo.jpeg" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/logo16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/logo192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/logo512.png" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="AI Character Chat Directory" />
         <meta name="twitter:card" content="summary_large_image" />

@@ -15,7 +15,7 @@ export async function initStorage() {
 export async function createTables() {
   try {
     // 创建projects表
-    await supabaseAdmin.rpc('exec_sql', {
+    const { error: projectsError } = await supabaseAdmin.rpc('exec_sql', {
       sql: `
         CREATE TABLE IF NOT EXISTS public.projects (
           id TEXT PRIMARY KEY,
@@ -32,14 +32,16 @@ export async function createTables() {
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
         );
       `
-    }).catch(error => {
-      console.error('创建projects表失败:', error);
-      // 尝试直接在SQL编辑器中运行
-      console.log('请在Supabase的SQL编辑器中手动运行创建表的SQL语句');
     });
     
+    if (projectsError) {
+      console.error('创建projects表失败:', projectsError);
+      // 尝试直接在SQL编辑器中运行
+      console.log('请在Supabase的SQL编辑器中手动运行创建表的SQL语句');
+    }
+    
     // 创建links表
-    await supabaseAdmin.rpc('exec_sql', {
+    const { error: linksError } = await supabaseAdmin.rpc('exec_sql', {
       sql: `
         CREATE TABLE IF NOT EXISTS public.links (
           id TEXT PRIMARY KEY,
@@ -54,12 +56,14 @@ export async function createTables() {
           CONSTRAINT links_short_link_unique UNIQUE (short_link)
         );
       `
-    }).catch(error => {
-      console.error('创建links表失败:', error);
     });
     
+    if (linksError) {
+      console.error('创建links表失败:', linksError);
+    }
+    
     // 创建计数器函数
-    await supabaseAdmin.rpc('exec_sql', {
+    const { error: counterError } = await supabaseAdmin.rpc('exec_sql', {
       sql: `
         CREATE OR REPLACE FUNCTION increment_counter(row_id TEXT)
         RETURNS INTEGER AS $$
@@ -73,9 +77,11 @@ export async function createTables() {
         END;
         $$ LANGUAGE plpgsql;
       `
-    }).catch(error => {
-      console.error('创建计数器函数失败:', error);
     });
+    
+    if (counterError) {
+      console.error('创建计数器函数失败:', counterError);
+    }
     
     return true;
   } catch (error) {
