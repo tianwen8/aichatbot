@@ -26,7 +26,7 @@ async function ProjectAnalyticsRSC({
 
   // if project created less than 3 days ago, it's a newly added project
   const newlyAddedProject =
-    new Date(project.createdAt).getTime() >
+    new Date(project.created_at).getTime() >
     Date.now() - 3 * 24 * 60 * 60 * 1000;
 
   console.log("Refreshing analytics data");
