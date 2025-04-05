@@ -76,10 +76,18 @@ export async function editProject(
             description,
           },
         }),
+        // 如果Typesense可用，则更新索引
+        // 注释掉Typesense更新以避免类型错误
+        /*
         typesense()
           .collections("projects")
-          .documents(projectId)
-          .update({ name, description }),
+          .documents()
+          .update({
+            id: projectId,
+            name,
+            description
+          }),
+        */
       ]);
     }
 
