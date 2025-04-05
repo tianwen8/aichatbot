@@ -43,9 +43,9 @@ export default function EditTeamForm({
   });
 
   const [state, formAction] = useFormState<
-    FormResponse & { user?: User },
+    FormResponse & { user?: User }, 
     FormData
-  >(selectUser, null);
+  >(selectUser as any, null);
 
   useEffect(() => {
     if (!state) {
