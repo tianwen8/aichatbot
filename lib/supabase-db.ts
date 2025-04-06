@@ -1,5 +1,6 @@
 import { supabase, supabaseAdmin, createBucketIfNotExists } from './supabase';
 import { measureAsync } from './performance';
+import { createClient } from '@supabase/supabase-js';
 
 // 存储桶名称
 export const THUMBNAILS_BUCKET = 'thumbnails';
@@ -151,7 +152,7 @@ export interface UserWithProjects extends User {
 
 // 获取精选项目
 export async function getFeaturedProjects(slugs: string[]): Promise<Project[]> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('projects')
     .select('*')
     .in('slug', slugs);
@@ -164,138 +165,227 @@ export async function getFeaturedProjects(slugs: string[]): Promise<Project[]> {
   return data as Project[];
 }
 
-// 获取所有验证过的项目
-export async function getVerifiedProjects(limit = 300): Promise<Project[]> {
-  return measureAsync('db-getVerifiedProjects', async () => {
-    try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('verified', true)
-        .order('clicks', { ascending: false })
-        .limit(limit);
-      
-      if (error) {
-        console.error('Error fetching verified projects:', error);
-        return [];
-      }
-      
-      return data as Project[];
-    } catch (e) {
-      console.error('Exception fetching projects:', e);
+// 获取已验证的项目列表
+export async function getVerifiedProjects(count = 12): Promise<any[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("projects")
+      .select("*")
+      .eq("verified", true)
+      .order("clicks", { ascending: false })
+      .limit(count);
+
+    if (error) {
+      console.error("Failed to fetch verified projects:", error);
       return [];
     }
-  }, { limit });
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching verified projects:", error);
+    return [];
+  }
 }
 
 // 按类别获取项目
-export async function getProjectsByCategory(category: string, limit = 50): Promise<Project[]> {
-  return measureAsync('db-getProjectsByCategory', async () => {
-    try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('category', category)
-        .eq('verified', true)
-        .order('clicks', { ascending: false })
-        .limit(limit);
-      
-      if (error) {
-        console.error(`Error fetching projects for category ${category}:`, error);
-        return [];
-      }
-      
-      return data as Project[];
-    } catch (e) {
-      console.error('Exception fetching projects by category:', e);
+export async function getProjectsByCategory(category: string, count = 12): Promise<any[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("projects")
+      .select("*")
+      .eq("verified", true)
+      .eq("category", category)
+      .order("clicks", { ascending: false })
+      .limit(count);
+
+    if (error) {
+      console.error(`Failed to fetch projects for category ${category}:`, error);
       return [];
     }
-  }, { category, limit });
-}
-
-// 搜索项目 - 优化性能
-export async function searchProjects(query: string, limit = 20): Promise<Project[]> {
-  return measureAsync('db-searchProjects', async () => {
-    if (!query || query.trim().length < 2) return [];
     
-    try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-        .order('clicks', { ascending: false })
-        .limit(limit);
-      
-      if (error) {
-        console.error('Error searching projects:', error);
-        return [];
-      }
-      
-      return data as Project[];
-    } catch (e) {
-      console.error('Exception searching projects:', e);
-      return [];
-    }
-  }, { query, limit });
+    return data || [];
+  } catch (error) {
+    console.error(`Error fetching projects for category ${category}:`, error);
+    return [];
+  }
 }
 
-// 获取单个项目详情（包含链接）
-export async function getProject(slug: string): Promise<EnrichedProject | null> {
-  return measureAsync('db-getProject', async () => {
-    try {
-      // 同时获取项目和链接，减少往返请求
-      const { data: project, error: projectError } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-      
-      if (projectError || !project) {
-        console.error('Error fetching project:', projectError);
-        return null;
-      }
-      
-      const { data: links, error: linksError } = await supabase
-        .from('links')
-        .select('*')
-        .eq('project_id', project.id);
-      
-      if (linksError) {
-        console.error('Error fetching project links:', linksError);
-        return null;
-      }
-      
-      const githubLink = links?.find(link => link.type === 'GITHUB');
-      const websiteLink = links?.find(link => link.type === 'WEBSITE');
-      
-      return {
-        ...project,
-        links: links || [],
-        githubLink,
-        websiteLink,
-      } as EnrichedProject;
-    } catch (error) {
-      console.error('Exception in getProject:', error);
+// 搜索项目
+export async function searchProjects(query: string, limit = 10): Promise<any[]> {
+  if (!query.trim()) {
+    return [];
+  }
+  
+  try {
+    // 使用ILIKE进行模糊搜索
+    const { data, error } = await supabaseAdmin
+      .from("projects")
+      .select("*")
+      .eq("verified", true)
+      .or(`name.ilike.%${query}%,description.ilike.%${query}%,keywords.ilike.%${query}%`)
+      .limit(limit);
+    
+    if (error) {
+      console.error("Failed to search projects:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error searching projects:", error);
+    return [];
+  }
+}
+
+// 获取项目通过slug
+export async function getProject(slug: string): Promise<any | null> {
+  console.log(`正在获取项目: ${slug}`);
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("projects")
+      .select(`
+        *,
+        websiteLink: links(*)
+      `)
+      .eq("slug", slug)
+      .eq("links.type", "website")
+      .single();
+
+    if (error) {
+      console.error(`获取项目失败 (slug=${slug}):`, error);
       return null;
     }
-  }, { slug });
+    
+    return data;
+  } catch (error) {
+    console.error(`获取项目时出错 (slug=${slug}):`, error);
+    return null;
+  }
 }
 
-// 项目链接点击计数增加
-export async function incrementProjectClicks(projectId: string): Promise<void> {
-  const { error } = await supabaseAdmin
-    .from('projects')
-    .update({ clicks: supabase.rpc('increment_counter', { row_id: projectId }) })
-    .eq('id', projectId);
-  
-  if (error) {
-    console.error('Error incrementing project clicks:', error);
+// 获取项目详情
+export async function getProjectBySlug(slug: string): Promise<any | null> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("projects")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+
+    if (error) {
+      console.error(`Failed to fetch project with slug ${slug}:`, error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error(`Error fetching project with slug ${slug}:`, error);
+    return null;
+  }
+}
+
+// 增加项目点击量
+export async function incrementProjectClicks(slug: string): Promise<boolean> {
+  try {
+    // 先获取当前项目信息
+    const project = await getProjectBySlug(slug);
+    
+    if (!project) {
+      return false;
+    }
+    
+    // 更新点击量
+    const { error } = await supabaseAdmin
+      .from("projects")
+      .update({ 
+        clicks: (project.clicks || 0) + 1,
+        updated_at: new Date().toISOString()
+      })
+      .eq("slug", slug);
+
+    if (error) {
+      console.error(`Failed to increment clicks for project ${slug}:`, error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`Error incrementing clicks for project ${slug}:`, error);
+    return false;
+  }
+}
+
+// 获取最新的提交项目
+export async function getLatestSubmissions(limit = 10): Promise<any[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("projects")
+      .select("*")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    
+    if (error) {
+      console.error("Failed to fetch latest submissions:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching latest submissions:", error);
+    return [];
+  }
+}
+
+// 审核项目
+export async function approveProject(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabaseAdmin
+      .from("projects")
+      .update({ 
+        status: "published",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", id);
+    
+    if (error) {
+      console.error(`Failed to approve project ${id}:`, error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`Error approving project ${id}:`, error);
+    return false;
+  }
+}
+
+// 拒绝项目
+export async function rejectProject(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabaseAdmin
+      .from("projects")
+      .update({ 
+        status: "rejected",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", id);
+    
+    if (error) {
+      console.error(`Failed to reject project ${id}:`, error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`Error rejecting project ${id}:`, error);
+    return false;
   }
 }
 
 // 获取所有用户
 export async function getAllUsers(): Promise<User[]> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('users')
     .select('*');
   
@@ -309,7 +399,7 @@ export async function getAllUsers(): Promise<User[]> {
 
 // 获取单个用户
 export async function getUser(username: string): Promise<User | null> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('users')
     .select('*')
     .eq('username', username)
@@ -331,7 +421,7 @@ export async function getUserWithProjects(username: string): Promise<UserWithPro
   if (!user) return null;
   
   // 获取用户关联的项目
-  const { data: projectUsers, error: projectUsersError } = await supabase
+  const { data: projectUsers, error: projectUsersError } = await supabaseAdmin
     .from('project_users')
     .select('project_id')
     .eq('user_id', user.id);
@@ -344,7 +434,7 @@ export async function getUserWithProjects(username: string): Promise<UserWithPro
   // 获取项目详情
   const projects = [];
   for (const pu of projectUsers || []) {
-    const { data: project, error: projectError } = await supabase
+    const { data: project, error: projectError } = await supabaseAdmin
       .from('projects')
       .select('*')
       .eq('id', pu.project_id)
