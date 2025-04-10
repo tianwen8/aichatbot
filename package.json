@@ -7,6 +7,8 @@
     "build": "next build",
     "supabase:init": "tsx --env-file=.env ./scripts/init-supabase.ts",
     "supabase:init:simple": "tsx --env-file=.env ./scripts/init-supabase-simple.ts",
+    "supabase:init:dub": "tsx scripts/init-supabase-dub.ts",
+    "supabase:storage:setup": "tsx scripts/setup-supabase-storage.ts",
     "db:generate": "prisma generate",
     "db:seed": "npx tsx --env-file=.env ./prisma/seed.ts",
     "db:push": "prisma db push",
@@ -14,7 +16,8 @@
     "format": "prettier \"**/*.{css,js,json,jsx,ts,tsx}\"",
     "start": "next start",
     "lint": "next lint",
-    "script": "tsx ./scripts/run.ts"
+    "script": "tsx ./scripts/run.ts",
+    "prisma:generate": "prisma generate"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.0.0",
@@ -28,7 +31,9 @@
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-tabs": "^1.1.4",
     "@sindresorhus/slugify": "^2.2.1",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5.71.10",
     "@tremor/react": "^3.16.1",
@@ -42,6 +47,7 @@
     "lucide-react": "0.372.0",
     "next": "14.3.0-canary.30",
     "next-auth": "5.0.0-beta.16",
+    "puppeteer": "^24.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-highlight-words": "^0.20.0",

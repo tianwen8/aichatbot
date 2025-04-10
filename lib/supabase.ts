@@ -17,18 +17,21 @@ export const supabaseAdmin = supabaseServiceRoleKey
     })
   : supabase;
 
-// 创建存储桶并设置公共访问权限的辅助函数
+// 创建存储桶（如果不存在）
 export async function createBucketIfNotExists(bucketName: string) {
-  const { data: buckets } = await supabaseAdmin.storage.listBuckets();
+  const { data, error } = await supabaseAdmin.storage.getBucket(bucketName);
   
-  if (!buckets?.find(bucket => bucket.name === bucketName)) {
-    const { error } = await supabaseAdmin.storage.createBucket(bucketName, {
-      public: true,
-      fileSizeLimit: 1024 * 1024 * 2, // 2MB限制
+  if (error && error.message.includes('does not exist')) {
+    const { data, error } = await supabaseAdmin.storage.createBucket(bucketName, {
+      public: true
     });
     
     if (error) {
       console.error(`Error creating bucket ${bucketName}:`, error);
+    } else {
+      console.log(`Created bucket: ${bucketName}`);
     }
+  } else if (error) {
+    console.error(`Error checking bucket ${bucketName}:`, error);
   }
 } 

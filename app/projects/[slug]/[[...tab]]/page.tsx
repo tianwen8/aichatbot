@@ -1,307 +1,355 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import ProjectAnalytics from "@/components/projects/project-analytics";
-import ProjectTeam from "@/components/projects/project-team";
+import { ChevronLeft, ExternalLink, Star, Users, Calendar, Info, Bookmark, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getProject, getVerifiedProjects } from "@/lib/supabase-db";
-import { notFound } from "next/navigation";
-import { Star, ExternalLink, Heart, Share2, Flag, Users, Clock, CheckCircle, ThumbsUp } from "lucide-react";
+import ProjectCard from "@/components/projects/project-card";
 
-export async function generateStaticParams() {
-  return [
-    {
-      tab: [], // for the root page
-    },
-  ];
-}
+// Helper function to format numbers
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toString();
+};
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const project = await getProject(params.slug);
-  
-  if (!project) {
-    return {
-      title: "Project Not Found",
-      description: "The requested project could not be found.",
-    };
-  }
-  
-  return {
-    title: `${project.name} | AI Chat Tool`,
-    description: project.description,
-    openGraph: {
-      images: [project.logo],
-    },
-  };
-}
-
-export default async function Project({
-  params: { slug, tab },
-}: {
+type Props = {
   params: {
     slug: string;
     tab?: string[];
   };
-}) {
-  const project = await getProject(slug);
+};
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const project = await getProject(params.slug);
+  if (!project) {
+    return {
+      title: "Project Not Found",
+    };
+  }
+
+  return {
+    title: `${project.name} - AI Character Directory`,
+    description: project.description,
+    keywords: project.name + ", AI character, AI chat, virtual assistant, chatbot",
+  };
+}
+
+export default async function ProjectPage({ params }: Props) {
+  const project = await getProject(params.slug);
+  const similarProjects = await getVerifiedProjects(5);
+
+  // Mock data for demo purposes
+  const projectData = {
+    ...project,
+    rating: 4.8,
+    users: 124500,
+    lastUpdated: "Apr 2023",
+    url: project.url || "https://example.com",
+    tags: ["AI Character", "Roleplay", "Interactive", "Dynamic personality"],
+    features: [
+      "Natural conversation capabilities",
+      "Memory of previous interactions",
+      "Customizable personality",
+      "Multimedia response options",
+      "Voice chat integration"
+    ],
+    pricing: "Free / Premium from $9.99/month"
+  };
 
   if (!project) {
-    notFound();
+    return (
+      <div className="container py-16 text-center">
+        <h1 className="text-2xl font-bold">Project Not Found</h1>
+        <p className="mt-2 text-gray-600">The project you're looking for doesn't exist.</p>
+        <Button asChild className="mt-8">
+          <Link href="/">Go Home</Link>
+        </Button>
+      </div>
+    );
   }
-  
-  // Get some similar projects
-  const similarProjects = await getVerifiedProjects(5);
-  
-  // Generate random rating for demo purposes
-  const rating = (4 + Math.random()).toFixed(1);
-  const totalReviews = Math.floor(Math.random() * 500) + 50;
-  
-  // Tags for the project
-  const tags = ["AI Chat", "Virtual Assistant", "English", "Free Trial"];
-  
-  // Main features
-  const features = [
-    "Natural conversation with AI characters",
-    "Customizable personality settings",
-    "Memory of previous interactions",
-    "Voice input and output capabilities",
-    "Multiple language support"
-  ];
 
-  const activeTab = tab && tab.length > 0 ? tab[0] : "overview";
+  // Determine the active tab
+  const activeTab = params.tab?.[0] || "overview";
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-12">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 py-6">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-center">
-            <div className="flex items-center">
-              <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg">
-                <Image
-                  src={project.logo}
-                  alt={project.name}
-                  fill
-                  className="object-cover"
-                />
-                {project.verified && (
-                  <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white">
-                    <CheckCircle className="h-3 w-3" />
-                  </div>
-                )}
-              </div>
-              <div className="ml-4">
-                <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
-                <div className="mt-1 flex items-center text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-yellow-400" />
-                    <span className="ml-1 font-medium">{rating}</span>
-                    <span className="ml-1 text-gray-400">({totalReviews} reviews)</span>
-                  </div>
-                  <span className="mx-2">•</span>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 text-gray-400" />
-                    <span className="ml-1">{project.clicks}+ users</span>
-                  </div>
-                </div>
-              </div>
+    <div className="bg-gray-50">
+      {/* Back Navigation */}
+      <div className="bg-white border-b">
+        <div className="container py-4">
+          <Link href="/" className="flex items-center text-sm text-gray-600 hover:text-primary">
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Directory
+          </Link>
+        </div>
+      </div>
+
+      {/* Top Info Area */}
+      <div className="bg-white border-b py-8">
+        <div className="container">
+          <div className="flex flex-col md:flex-row items-start gap-6">
+            {/* Project Logo */}
+            <div className="w-24 h-24 rounded-xl overflow-hidden bg-gradient-to-br from-purple-100 via-violet-50 to-blue-100 shrink-0 flex items-center justify-center">
+              {project.logo ? (
+                <Image src={project.logo} alt={project.name} width={96} height={96} unoptimized className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-3xl font-bold text-gray-400">{project.name.charAt(0)}</span>
+              )}
             </div>
             
-            <div className="mt-4 flex space-x-3 md:mt-0 md:ml-auto">
-              {project.websiteLink && (
-                <a
-                  href={project.websiteLink.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-                >
-                  <ExternalLink className="mr-1.5 h-4 w-4" />
-                  Visit Website
-                </a>
-              )}
-              <button className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 border border-gray-300">
-                <Heart className="mr-1.5 h-4 w-4" />
-                Save
-              </button>
-              <button className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 border border-gray-300">
-                <Share2 className="mr-1.5 h-4 w-4" />
-                Share
-              </button>
+            {/* Project Info */}
+            <div className="flex-1">
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+                <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>
+                
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="px-3 gap-1">
+                    <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400" />
+                    <span>{projectData.rating}</span>
+                  </Badge>
+                  
+                  <Badge variant="outline" className="px-3 gap-1">
+                    <Users className="h-3.5 w-3.5 text-gray-400" />
+                    <span>{formatNumber(projectData.users)} users</span>
+                  </Badge>
+                  
+                  <Badge variant="outline" className="px-3 gap-1">
+                    <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                    <span>Updated {projectData.lastUpdated}</span>
+                  </Badge>
+                </div>
+                
+                <div className="ml-auto hidden md:flex">
+                  <Button asChild className="rounded-full">
+                    <a href={projectData.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                      <span>Visit Website</span>
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </div>
+              </div>
+              
+              <p className="mt-3 text-gray-600">{project.description}</p>
+              
+              <div className="mt-4 flex flex-wrap gap-2">
+                {projectData.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+              
+              <div className="mt-6 md:hidden">
+                <Button asChild className="w-full rounded-full">
+                  <a href={projectData.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+                    <span>Visit Website</span>
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
             </div>
-          </div>
-          
-          {/* Tabs */}
-          <div className="mt-6 border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              {["Overview", "Reviews", "Alternatives", "Pricing", "FAQ"].map((item) => {
-                const isActive = 
-                  (item.toLowerCase() === "overview" && activeTab === "overview") ||
-                  item.toLowerCase() === activeTab;
-                return (
-                  <Link
-                    key={item}
-                    href={`/projects/${slug}${item.toLowerCase() === "overview" ? "" : `/${item.toLowerCase()}`}`}
-                    className={`border-b-2 py-2 px-1 text-sm font-medium ${
-                      isActive
-                        ? "border-blue-500 text-blue-600"
-                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                    }`}
-                  >
-                    {item}
-                  </Link>
-                );
-              })}
-            </nav>
           </div>
         </div>
       </div>
       
-      {/* Main content */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* Left column - Main content */}
-          <div className="lg:col-span-2">
-            {/* Description */}
-            <div className="rounded-lg bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900">About {project.name}</h2>
-              <p className="mt-4 text-sm text-gray-600">{project.description}</p>
-              
-              {/* Tags */}
-              <div className="mt-6">
-                <h3 className="text-sm font-medium text-gray-900">Categories</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+      {/* Tabs Navigation */}
+      <div className="bg-white border-b">
+        <div className="container">
+          <div className="flex overflow-x-auto">
+            <Link 
+              href={`/projects/${params.slug}`} 
+              className={`flex items-center border-b-2 px-4 py-3 text-sm font-medium ${
+                activeTab === "overview" ? "border-primary text-primary" : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Overview
+            </Link>
+            <Link 
+              href={`/projects/${params.slug}/reviews`} 
+              className={`flex items-center border-b-2 px-4 py-3 text-sm font-medium ${
+                activeTab === "reviews" ? "border-primary text-primary" : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Reviews
+            </Link>
+            <Link 
+              href={`/projects/${params.slug}/alternatives`} 
+              className={`flex items-center border-b-2 px-4 py-3 text-sm font-medium ${
+                activeTab === "alternatives" ? "border-primary text-primary" : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Alternatives
+            </Link>
+            <Link 
+              href={`/projects/${params.slug}/pricing`} 
+              className={`flex items-center border-b-2 px-4 py-3 text-sm font-medium ${
+                activeTab === "pricing" ? "border-primary text-primary" : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Pricing
+            </Link>
+            <Link 
+              href={`/projects/${params.slug}/faq`} 
+              className={`flex items-center border-b-2 px-4 py-3 text-sm font-medium ${
+                activeTab === "faq" ? "border-primary text-primary" : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              FAQ
+            </Link>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Content */}
+      <div className="container py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            {/* Project Image */}
+            {project.image && (
+              <div className="rounded-xl overflow-hidden border bg-white p-2">
+                <Image 
+                  src={project.image} 
+                  alt={`${project.name} screenshot`} 
+                  width={1200} 
+                  height={675}
+                  className="rounded-lg w-full h-auto object-cover"
+                  unoptimized
+                />
               </div>
-              
-              {/* Features */}
-              <div className="mt-6">
-                <h3 className="text-sm font-medium text-gray-900">Main Features</h3>
-                <ul className="mt-2 space-y-2">
-                  {features.map((feature) => (
-                    <li key={feature} className="flex items-start">
-                      <CheckCircle className="mr-2 h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-600">{feature}</span>
+            )}
+            
+            {/* About Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>About {project.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-gray-600">
+                  {project.description}
+                </p>
+                <p className="text-gray-600">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ac magna vel augue euismod feugiat. 
+                  In hac habitasse platea dictumst. Sed a ligula quis lorem rhoncus consequat.
+                </p>
+              </CardContent>
+            </Card>
+            
+            {/* Features Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Key Features</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {projectData.features.map((feature, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                        <span className="h-2 w-2 rounded-full bg-primary" />
+                      </div>
+                      <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
-              </div>
-            </div>
-            
-            {/* Screenshots */}
-            <div className="mt-8 rounded-lg bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900">Screenshots</h2>
-              <div className="mt-4 grid grid-cols-2 gap-4">
-                <div className="aspect-w-16 aspect-h-9 relative h-44 overflow-hidden rounded-md bg-gray-100">
-                  <Image
-                    src={project.logo}
-                    alt="Screenshot 1"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="aspect-w-16 aspect-h-9 relative h-44 overflow-hidden rounded-md bg-gray-100">
-                  <Image
-                    src={project.logo}
-                    alt="Screenshot 2"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
           
-          {/* Right column - Sidebar */}
-          <div>
-            {/* Quick info */}
-            <div className="rounded-lg bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900">Information</h2>
-              <dl className="mt-4 space-y-4">
-                <div className="flex justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Rating</dt>
-                  <dd className="text-sm text-gray-900 flex items-center">
-                    <Star className="mr-1 h-4 w-4 text-yellow-400" />
-                    {rating} / 5.0
-                  </dd>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Quick Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Info</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Rating</span>
+                  <div className="flex items-center">
+                    <span className="font-medium">{projectData.rating}</span>
+                    <div className="ml-1 flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`h-3.5 w-3.5 ${
+                            i < Math.floor(projectData.rating) 
+                              ? 'text-yellow-400 fill-yellow-400' 
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Users</dt>
-                  <dd className="text-sm text-gray-900">{project.clicks}+</dd>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Users</span>
+                  <span className="font-medium">{formatNumber(projectData.users)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Added</dt>
-                  <dd className="text-sm text-gray-900">{new Date(project.created_at).toLocaleDateString()}</dd>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Last Updated</span>
+                  <span className="font-medium">{projectData.lastUpdated}</span>
                 </div>
-                <div className="flex justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Updated</dt>
-                  <dd className="text-sm text-gray-900">{new Date(project.updated_at).toLocaleDateString()}</dd>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Pricing</span>
+                  <span className="font-medium">{projectData.pricing}</span>
                 </div>
-                <div className="flex justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Pricing</dt>
-                  <dd className="text-sm text-gray-900">Free / Freemium</dd>
+                
+                <div className="pt-2">
+                  <Button asChild className="w-full rounded-full">
+                    <a href={projectData.url} target="_blank" rel="noopener noreferrer">
+                      Visit Website
+                    </a>
+                  </Button>
                 </div>
-              </dl>
-              
-              <div className="mt-6">
-                <a
-                  href={project.websiteLink?.url || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full rounded-md bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-                >
-                  Visit Official Website
-                </a>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             
-            {/* Similar products */}
-            <div className="mt-8 rounded-lg bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900">Similar AI Chat Tools</h2>
-              <div className="mt-4 space-y-4">
+            {/* Similar Projects */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Similar Tools</CardTitle>
+                <CardDescription>You might also like</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 {similarProjects.slice(0, 3).map((similarProject) => (
-                  <Link
-                    key={similarProject.id}
+                  <Link 
+                    key={similarProject.slug}
                     href={`/projects/${similarProject.slug}`}
-                    className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-md"
+                    className="group flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-gray-50"
                   >
-                    <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md">
-                      <Image
-                        src={similarProject.logo}
-                        alt={similarProject.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">{similarProject.name}</p>
-                      <div className="flex items-center">
-                        <Star className="h-3 w-3 text-yellow-400" />
-                        <span className="ml-1 text-xs text-gray-500">{(4 + Math.random()).toFixed(1)}</span>
-                      </div>
-                    </div>
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-100 via-violet-50 to-blue-100">
+                      {similarProject.logo ? (
+                        <Image 
+                          src={similarProject.logo} 
+                          alt={similarProject.name} 
+                          width={40} 
+                          height={40} 
+                          className="rounded-full object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <span className="text-lg font-bold text-gray-400">{similarProject.name.charAt(0)}</span>
+                      )}
+            </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 truncate group-hover:text-primary">{similarProject.name}</h3>
+                      <p className="text-sm text-gray-500 truncate">{similarProject.description}</p>
+            </div>
+                    <ArrowUpRight className="h-4 w-4 text-gray-400 group-hover:text-primary" />
                   </Link>
                 ))}
-              </div>
-              <div className="mt-4 text-center">
-                <Link
-                  href="/"
-                  className="text-sm font-medium text-blue-600 hover:text-blue-500"
-                >
-                  View more alternatives
-                </Link>
-              </div>
-            </div>
+                
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={`/projects/${params.slug}/alternatives`}>View All Alternatives</Link>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

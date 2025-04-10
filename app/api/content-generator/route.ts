@@ -1,157 +1,339 @@
 import { NextResponse } from "next/server";
 
-// 辅助函数：根据网站类型生成更详细的关键词
-function generateKeywords(category: string, title: string): string[] {
-  const baseKeywords = ["AI聊天", "人工智能", "聊天机器人", "AI助手"];
-  
-  const categoryKeywords: Record<string, string[]> = {
-    "roleplay": ["角色扮演", "虚拟角色", "AI角色", "角色创建", "情感陪伴", "虚拟伴侣"],
-    "qa": ["问答助手", "AI答疑", "知识库", "智能问答", "信息检索", "学习助手"],
-    "companion": ["AI伴侣", "情感支持", "虚拟朋友", "心理健康", "情感交流", "互动体验"],
-    "writing": ["AI写作", "内容创作", "自动写作", "创意写作", "写作助手", "文本生成"],
-    "multilingual": ["多语言支持", "语言翻译", "跨语言交流", "国际化AI", "全球聊天", "语言学习"],
-    "llm": ["大型语言模型", "GPT", "BERT", "自然语言处理", "语义理解", "Claude", "LLaMA"]
-  };
-  
-  // 获取网站类型的关键词
-  const specificKeywords = categoryKeywords[category] || [];
-  
-  // 结合标题生成个性化关键词
-  const titleWords = title.toLowerCase().split(' ');
-  const titleRelatedKeywords = titleWords
-    .filter(word => word.length > 3)
-    .map(word => [`${word} AI`, `${word}助手`, `${word}聊天`])
-    .flat();
-  
-  // 合并所有关键词并去重
-  const allKeywords = [...baseKeywords, ...specificKeywords, ...titleRelatedKeywords];
-  return Array.from(new Set(allKeywords));
+// Function to simulate AI generation with a delay to mimic API response time
+function simulateAIGeneration(prompt: string, type: 'keywords' | 'description' | 'features') {
+  return new Promise<string>((resolve) => {
+    // Add a random delay to make it feel like the AI is "thinking"
+    const delay = Math.floor(Math.random() * 1000) + 500;
+    setTimeout(() => {
+      if (type === 'keywords') {
+        resolve(generateKeywordsAdvanced(prompt));
+      } else if (type === 'description') {
+        resolve(generateDescription(prompt));
+      } else {
+        resolve(JSON.stringify(generateFeatureList(prompt)));
+      }
+    }, delay);
+  });
 }
 
-// 生成SEO友好的描述
-function generateDescriptions(title: string, category: string, keywords: string[]): {
-  short: string;
-  medium: string;
-  long: string;
-} {
-  // 根据类别生成适当的动词和形容词
-  const categoryAttributes: Record<string, {verbs: string[], adjectives: string[]}> = {
-    "roleplay": {
-      verbs: ["创建", "扮演", "体验", "互动"],
-      adjectives: ["身临其境的", "个性化的", "互动式的", "富有想象力的"]
+// More sophisticated keyword generation that considers the prompt and category
+function generateKeywordsAdvanced(prompt: string): string {
+  const parts = prompt.split(',');
+  const name = parts[0];
+  const category = parts.length > 1 ? parts[1].trim() : '';
+  
+  // Base keywords that are common for AI tools
+  const baseKeywords = ['AI', 'artificial intelligence', 'tool', 'assistant', 'chat', 'automation'];
+  
+  // Category-specific keywords
+  const categoryKeywords: Record<string, string[]> = {
+    'Writing': ['content creation', 'writing tool', 'copywriting', 'text generator', 'content assistant'],
+    'Image': ['image generation', 'AI art', 'visual content', 'creative design', 'illustration'],
+    'Voice': ['voice assistant', 'text to speech', 'audio generation', 'voice conversion', 'voice clone'],
+    'Video': ['video creation', 'animation', 'video editing', 'AI video', 'visual effects'],
+    'Code': ['coding assistant', 'developer tool', 'programming aid', 'code generation', 'AI programmer'],
+    'Productivity': ['workflow automation', 'task management', 'efficiency tool', 'organization'],
+    'Business': ['business automation', 'customer service', 'sales assistant', 'marketing tool'],
+    'Education': ['learning assistant', 'tutor', 'study aid', 'educational tool', 'knowledge base'],
+    'Entertainment': ['fun AI', 'games', 'entertainment bot', 'creative companion', 'AI friend'],
+    'Other': ['utility', 'specialized AI', 'niche tool', 'custom assistant']
+  };
+  
+  // Start with the tool name and add some base keywords
+  let selectedKeywords = [name, ...baseKeywords];
+  
+  // Add category-specific keywords if a category was provided and exists in our map
+  if (category && categoryKeywords[category]) {
+    selectedKeywords = [...selectedKeywords, ...categoryKeywords[category]];
+  }
+  
+  // Add some randomness to make different results for similar tools
+  const extraKeywords = [
+    'smart tool', 'digital assistant', 'virtual helper', 'online service',
+    'productivity enhancer', 'time-saver', 'innovative solution', 'problem solver'
+  ];
+  
+  // Add some random extras (2-4)
+  const randomCount = Math.floor(Math.random() * 3) + 2;
+  for (let i = 0; i < randomCount; i++) {
+    const randomIndex = Math.floor(Math.random() * extraKeywords.length);
+    selectedKeywords.push(extraKeywords[randomIndex]);
+    extraKeywords.splice(randomIndex, 1); // Remove so we don't pick it again
+  }
+  
+  // Shuffle the keywords for variety
+  selectedKeywords.sort(() => Math.random() - 0.5);
+  
+  // Return a comma-separated list
+  return selectedKeywords.slice(0, 10).join(', ');
+}
+
+// Generate a description based on the provided prompt
+function generateDescription(prompt: string): string {
+  const parts = prompt.split(',');
+  const name = parts[0];
+  const category = parts.length > 1 ? parts[1].trim() : '';
+  
+  // Base templates to choose from
+  const templates = [
+    `{name} is an advanced AI-powered tool that {function}. Designed for {audience}, it offers a {adj} experience through its {feature}. Users will appreciate its {benefit} and {unique}.`,
+    `Meet {name}, the cutting-edge AI solution for {problem}. With its {feature}, users can {action} more effectively. {name} stands out with its {unique} and delivers {benefit} for all {audience}.`,
+    `{name} represents the next generation of {category} tools. Built with sophisticated AI technology, it {function} with remarkable {adj}. Ideal for {audience}, {name} provides {benefit} through its {feature}.`,
+    `Looking for a powerful {category} assistant? {name} offers {benefit} through its innovative {feature}. This AI-powered solution helps users {action}, making it perfect for {audience} seeking {adj} results.`,
+    `Transform your {domain} experience with {name}, an AI tool that {function}. Its {feature} enables {audience} to {action} with unprecedented {adj}. Enjoy {benefit} and {unique} that sets {name} apart.`
+  ];
+  
+  // Category-specific descriptions
+  const categorySpecs: Record<string, any> = {
+    'Writing': {
+      function: 'generates high-quality written content',
+      problem: 'content creation and copywriting',
+      action: 'create compelling written material',
+      feature: 'advanced language understanding capabilities',
+      domain: 'content creation'
     },
-    "qa": {
-      verbs: ["解答", "学习", "获取", "查询"],
-      adjectives: ["准确的", "专业的", "知识丰富的", "实用的"]
+    'Image': {
+      function: 'creates stunning visual content',
+      problem: 'image generation and design',
+      action: 'produce professional-grade imagery',
+      feature: 'state-of-the-art visual processing algorithms',
+      domain: 'visual design'
     },
-    "companion": {
-      verbs: ["交流", "陪伴", "分享", "倾诉"],
-      adjectives: ["温暖的", "理解的", "支持性的", "贴心的"]
+    'Voice': {
+      function: 'transforms text into natural-sounding speech',
+      problem: 'audio content creation',
+      action: 'generate realistic voice recordings',
+      feature: 'human-like voice synthesis technology',
+      domain: 'audio production'
     },
-    "writing": {
-      verbs: ["创作", "生成", "编写", "构思"],
-      adjectives: ["创意十足的", "高效的", "多样化的", "专业的"]
+    'Video': {
+      function: 'helps create and edit video content',
+      problem: 'video production challenges',
+      action: 'produce engaging video content',
+      feature: 'intelligent scene recognition and editing tools',
+      domain: 'video creation'
     },
-    "multilingual": {
-      verbs: ["交流", "翻译", "学习", "沟通"],
-      adjectives: ["多语言的", "国际化的", "跨文化的", "全球性的"]
+    'Code': {
+      function: 'assists with programming and development tasks',
+      problem: 'coding efficiency and quality',
+      action: 'write better code faster',
+      feature: 'context-aware code generation capabilities',
+      domain: 'software development'
     },
-    "llm": {
-      verbs: ["处理", "生成", "理解", "分析"],
-      adjectives: ["强大的", "先进的", "智能的", "灵活的"]
+    'Productivity': {
+      function: 'streamlines workflows and automates routine tasks',
+      problem: 'daily productivity challenges',
+      action: 'accomplish more in less time',
+      feature: 'smart workflow optimization tools',
+      domain: 'work'
+    },
+    'Business': {
+      function: 'enhances business operations and customer interactions',
+      problem: 'business process optimization',
+      action: 'improve customer engagement and operational efficiency',
+      feature: 'business-focused AI capabilities',
+      domain: 'business'
+    },
+    'Education': {
+      function: 'facilitates learning and knowledge acquisition',
+      problem: 'educational support and tutoring',
+      action: 'learn more effectively',
+      feature: 'personalized educational guidance systems',
+      domain: 'learning'
+    },
+    'Entertainment': {
+      function: 'provides engaging and interactive experiences',
+      problem: 'creating fun and engaging interactions',
+      action: 'enjoy entertaining AI-powered experiences',
+      feature: 'creative content generation abilities',
+      domain: 'entertainment'
+    },
+    'Other': {
+      function: 'offers specialized assistance for specific needs',
+      problem: 'specialized tasks and challenges',
+      action: 'achieve specific goals more efficiently',
+      feature: 'customized AI functionalities',
+      domain: 'specialized work'
     }
   };
   
-  const attrs = categoryAttributes[category] || {
-    verbs: ["使用", "体验", "尝试", "探索"],
-    adjectives: ["创新的", "智能的", "高效的", "实用的"]
+  // General attributes that can apply to any tool
+  const attributes = {
+    adj: ['impressive', 'seamless', 'intuitive', 'efficient', 'reliable', 'powerful', 'innovative', 'user-friendly'],
+    audience: ['professionals', 'creators', 'everyday users', 'businesses', 'students', 'developers', 'content producers', 'teams'],
+    benefit: ['significant time savings', 'enhanced productivity', 'superior results', 'creative inspiration', 'streamlined workflows', 'reduced workload', 'greater accuracy'],
+    unique: ['continuously improving AI capabilities', 'intuitive user interface', 'seamless integration with other tools', 'customizable features', 'cutting-edge technology']
   };
   
-  // 随机选择动词和形容词
-  const getRandomItem = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-  const verb = getRandomItem(attrs.verbs);
-  const adjective = getRandomItem(attrs.adjectives);
+  // Select a random template
+  const template = templates[Math.floor(Math.random() * templates.length)];
   
-  // 随机选择关键词子集
-  const shuffledKeywords = [...keywords].sort(() => 0.5 - Math.random());
-  const randomKeywords = shuffledKeywords.slice(0, 3).join('、');
+  // Get category-specific attributes or use general ones for "Other" or missing categories
+  const specs = category && categorySpecs[category] ? categorySpecs[category] : categorySpecs['Other'];
   
-  // 生成不同长度的描述
-  return {
-    short: `${title}是一款${adjective}AI聊天工具，提供${randomKeywords}等功能。`,
-    medium: `${title}是一款${adjective}AI聊天工具，让您能够${verb}各种智能对话场景。支持${randomKeywords}等多种功能，为用户提供丰富的AI互动体验。`,
-    long: `${title}是一款领先的${adjective}AI聊天工具，专为需要${verb}高质量AI对话的用户设计。它提供包括${randomKeywords}在内的多种强大功能，让您的AI互动体验更加丰富和个性化。无论是日常聊天、学习辅助还是创意激发，${title}都能满足您的各种需求，成为您的智能助手。`
-  };
-}
-
-// 生成功能列表建议
-function generateFeatureSuggestions(category: string): string[] {
-  const commonFeatures = [
-    "自然流畅的对话能力",
-    "个性化定制选项",
-    "多平台支持",
-    "数据隐私保护",
-    "实时响应"
+  // Build the description by replacing placeholders
+  let description = template
+    .replace('{name}', name)
+    .replace('{category}', category || 'AI')
+    .replace('{function}', specs.function)
+    .replace('{problem}', specs.problem)
+    .replace('{action}', specs.action)
+    .replace('{feature}', specs.feature)
+    .replace('{domain}', specs.domain)
+    .replace('{adj}', attributes.adj[Math.floor(Math.random() * attributes.adj.length)])
+    .replace('{audience}', attributes.audience[Math.floor(Math.random() * attributes.audience.length)])
+    .replace('{benefit}', attributes.benefit[Math.floor(Math.random() * attributes.benefit.length)])
+    .replace('{unique}', attributes.unique[Math.floor(Math.random() * attributes.unique.length)]);
+  
+  // Add some extra sentences for more detailed descriptions
+  const extraSentences = [
+    `Whether you're a beginner or expert, ${name} adapts to your skill level.`,
+    `${name} is regularly updated with new features based on user feedback.`,
+    `With its intuitive interface, getting started with ${name} takes just minutes.`,
+    `Thousands of users already rely on ${name} for their daily ${specs.domain} needs.`,
+    `${name} integrates seamlessly with popular tools in the ${category || 'AI'} space.`,
+    `Security and privacy are priorities, with ${name} implementing robust data protection measures.`,
+    `The team behind ${name} is dedicated to providing exceptional customer support.`,
+    `Try ${name} today and join the community of satisfied users experiencing the future of ${specs.domain}.`
   ];
   
+  // Add 2-3 random extra sentences
+  const extraCount = Math.floor(Math.random() * 2) + 2;
+  const selectedExtras = [];
+  for (let i = 0; i < extraCount; i++) {
+    const idx = Math.floor(Math.random() * extraSentences.length);
+    selectedExtras.push(extraSentences[idx]);
+    extraSentences.splice(idx, 1); // Remove to avoid duplication
+  }
+  
+  description += ' ' + selectedExtras.join(' ');
+  return description;
+}
+
+// Generate a list of features for an AI tool
+function generateFeatureList(prompt: string): string[] {
+  const parts = prompt.split(',');
+  const name = parts[0];
+  const category = parts.length > 1 ? parts[1].trim() : '';
+  
+  // Common features across all AI tools
+  const commonFeatures = [
+    'User-friendly interface',
+    'Cloud-based functionality',
+    'Regular updates and improvements',
+    'Cross-platform compatibility',
+    'API access for developers',
+    'Custom settings and preferences',
+    'Detailed documentation and tutorials'
+  ];
+  
+  // Category-specific features
   const categoryFeatures: Record<string, string[]> = {
-    "roleplay": [
-      "详细的角色设定功能",
-      "个性化的角色形象",
-      "情感表达能力",
-      "记忆上下文的长对话",
-      "多样的角色库",
-      "角色成长系统"
+    'Writing': [
+      'Advanced grammar and style checking',
+      'Multiple writing styles and tones',
+      'Plagiarism detection',
+      'SEO optimization suggestions',
+      'Content templates for various purposes',
+      'Multi-language support',
+      'Export to multiple formats'
     ],
-    "qa": [
-      "精准的知识检索",
-      "专业领域知识支持",
-      "实时信息更新",
-      "多来源信息验证",
-      "复杂问题分解能力",
-      "学习进度跟踪"
+    'Image': [
+      'High-resolution image generation',
+      'Custom style controls',
+      'Batch processing capabilities',
+      'Image editing and enhancement',
+      'Various artistic style options',
+      'Background removal and replacement',
+      'Prompt library for inspiration'
     ],
-    "companion": [
-      "情感理解与回应",
-      "心理健康支持功能",
-      "个性化陪伴体验",
-      "日常提醒与建议",
-      "情绪分析与回应",
-      "长期记忆功能"
+    'Voice': [
+      'Multiple voice options and accents',
+      'Emotional tone adjustment',
+      'Real-time voice conversion',
+      'Audio quality enhancement',
+      'Customizable speech patterns',
+      'Background noise reduction',
+      'Voice cloning capabilities'
     ],
-    "writing": [
-      "多种文体风格生成",
-      "内容改写与优化",
-      "创意灵感提供",
-      "语法与拼写检查",
-      "多语言内容创作",
-      "写作风格定制"
+    'Video': [
+      'AI-powered video editing',
+      'Scene detection and segmentation',
+      'Special effects library',
+      'Automatic captioning',
+      'Green screen removal',
+      'Motion tracking',
+      'Style transfer between videos'
     ],
-    "multilingual": [
-      "实时语言翻译",
-      "多语言无缝切换",
-      "文化背景适应",
-      "方言与口音支持",
-      "语言学习辅助功能",
-      "国际化表情符号支持"
+    'Code': [
+      'Multi-language code support',
+      'Code completion and suggestions',
+      'Bug detection and fixes',
+      'Performance optimization hints',
+      'Code refactoring assistance',
+      'Documentation generation',
+      'Git integration'
     ],
-    "llm": [
-      "高级语义理解能力",
-      "复杂指令处理",
-      "上下文长记忆",
-      "代码生成与解释",
-      "内容摘要与扩展",
-      "模型行为自定义"
+    'Productivity': [
+      'Task prioritization',
+      'Automated scheduling',
+      'Email response suggestions',
+      'Document summarization',
+      'Meeting transcription and notes',
+      'Time tracking features',
+      'Integration with popular productivity tools'
+    ],
+    'Business': [
+      'Customer interaction analytics',
+      'Sales forecasting',
+      'Automated customer support',
+      'Invoice and document processing',
+      'Market trend analysis',
+      'Business report generation',
+      'CRM integration'
+    ],
+    'Education': [
+      'Personalized learning paths',
+      'Progress tracking and analytics',
+      'Interactive quizzes and exercises',
+      'Subject-specific tutoring',
+      'Study material generation',
+      'Flashcard creation',
+      'Learning schedule optimization'
+    ],
+    'Entertainment': [
+      'Interactive storytelling',
+      'Personalized content recommendations',
+      'Character and scenario generation',
+      'Game assistance and strategies',
+      'Creative prompt suggestions',
+      'Collaborative creation tools',
+      'Voice-controlled interactions'
+    ],
+    'Other': [
+      'Customizable workflows',
+      'Data analysis capabilities',
+      'Personalization options',
+      'Export and sharing features',
+      'Collaborative tools',
+      'Offline functionality',
+      'Premium support options'
     ]
   };
   
-  // 获取类别特定的功能
-  const specificFeatures = categoryFeatures[category] || [];
+  // Select 4-5 common features
+  const selectedCommon = commonFeatures.sort(() => Math.random() - 0.5).slice(0, 4 + Math.floor(Math.random() * 2));
   
-  // 随机选择共性功能和特定功能，组合成推荐列表
-  const allFeatures = [...commonFeatures, ...specificFeatures];
-  const shuffledFeatures = [...allFeatures].sort(() => 0.5 - Math.random());
-  return shuffledFeatures.slice(0, 5);
+  // Select 5-6 category-specific features
+  const specificFeatures = category && categoryFeatures[category] 
+    ? categoryFeatures[category] 
+    : categoryFeatures['Other'];
+  
+  const selectedSpecific = specificFeatures.sort(() => Math.random() - 0.5).slice(0, 5 + Math.floor(Math.random() * 2));
+  
+  // Combine and return all features
+  return [...selectedCommon, ...selectedSpecific];
 }
 
 export async function POST(request: Request) {
@@ -161,38 +343,71 @@ export async function POST(request: Request) {
     
     if (!title) {
       return NextResponse.json(
-        { success: false, message: "标题是必需的" },
+        { success: false, message: "Title is required" },
         { status: 400 }
       );
     }
     
-    // 生成关键词
-    const keywords = generateKeywords(category || "general", title);
+    console.log(`Generating content for ${title}, category: ${category || 'unknown'}`);
     
-    // 生成描述文本
-    const descriptions = generateDescriptions(title, category || "general", keywords);
+    // Use simulated AI to generate keywords
+    const keywordsPrompt = `${title},${category}`;
+    const keywords = await simulateAIGeneration(keywordsPrompt, 'keywords');
     
-    // 生成功能建议
-    const features = generateFeatureSuggestions(category || "general");
+    // Use simulated AI to generate descriptions of different lengths
+    const descPrompt = `${title},${category}`;
+    const description = await simulateAIGeneration(descPrompt, 'description');
     
-    // 返回生成的内容
+    // Use short and medium descriptions as alternatives
+    const shortDescription = description.substring(0, 80) + '...';
+    const mediumDescription = description.length > 150 
+      ? description.substring(0, 150) + '...'
+      : description;
+    
+    // Use simulated AI to generate feature list
+    const featuresPrompt = `${title},${category}`;
+    const featuresJson = await simulateAIGeneration(featuresPrompt, 'features');
+    const features = JSON.parse(featuresJson);
+    
+    // Generate SEO suggestions
+    const seoScore = Math.floor(Math.random() * 30) + 70; // Between 70-100
+    const seoSuggestions = [];
+    
+    if (keywords.split(',').length < 5) {
+      seoSuggestions.push("Add more keywords to improve search visibility");
+    }
+    
+    if (description.length < 100) {
+      seoSuggestions.push("Expand the description to include more relevant information and keywords");
+    }
+    
+    if (!category) {
+      seoSuggestions.push("Select a category to help with classification and discovery");
+    }
+    
+    // Return the generated content
     return NextResponse.json({
       success: true,
       data: {
-        keywords: keywords.join(", "),
-        descriptions,
+        keywords,
+        descriptions: {
+          short: shortDescription,
+          medium: mediumDescription,
+          long: description
+        },
         features,
         suggestions: {
-          title: `${title} - 专业的AI聊天助手`,
-          seoScore: Math.floor(Math.random() * 30) + 70 // 模拟的SEO评分(70-100)
+          title: `${title} - Professional AI Chat Assistant`,
+          seoScore,
+          improvements: seoSuggestions
         }
       }
     });
     
-  } catch (error) {
-    console.error("内容生成失败:", error);
+  } catch (error: any) {
+    console.error("Content generation failed:", error);
     return NextResponse.json(
-      { success: false, message: "内容生成服务出错" },
+      { success: false, message: "Content generation service error: " + (error.message || "Unknown error") },
       { status: 500 }
     );
   }

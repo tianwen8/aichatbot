@@ -1,94 +1,123 @@
-import { BlurImage } from "@dub/ui";
-import { Project } from "@/lib/supabase-db";
 import Link from "next/link";
-import { Badge, Clock, ExternalLink, Star, ThumbsUp, Users, CheckCircle } from "lucide-react";
+import Image from "next/image";
+import { StarIcon, Users2Icon, ClockIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+// Helper functions to format numbers
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toString();
+};
+
+// Get a random category for demo
+const getRandomCategory = () => {
+  const categories = [
+    "AI Chat", "Virtual Assistant", "AI Character", "Roleplay", 
+    "AI Tool", "Language Model", "Content Creator", "Image Generator"
+  ];
+  return categories[Math.floor(Math.random() * categories.length)];
+};
+
+type ProjectCardProps = {
+  name: string;
+  description: string;
+  slug: string;
+  image?: string;
+  url?: string;
+  users?: number;
+  rating?: number;
+  updated?: string;
+  gradient?: string;
+  featured?: boolean;
+};
 
 export default function ProjectCard({
-  id,
   name,
   description,
   slug,
-  logo,
-  gradient,
-  clicks,
-  verified,
-}: Project) {
-  // Generate a random rating between 4.0 and 5.0 for demo purposes
-  const rating = (4 + Math.random()).toFixed(1);
+  image,
+  url,
+  users = Math.floor(Math.random() * 10000),
+  rating = parseFloat((Math.random() * 2 + 3).toFixed(1)),
+  updated = "2023-05-01",
+  gradient = "from-purple-100 via-violet-50 to-blue-100",
+  featured = false,
+}: ProjectCardProps) {
+  // Format the updated date
+  const updatedDate = new Date(updated);
+  const formattedDate = `${updatedDate.toLocaleString('default', { month: 'short' })} ${updatedDate.getFullYear()}`;
   
-  // Generate random numbers for stats
-  const userCount = Math.floor(Math.random() * 50000) + 5000;
-  const formattedUserCount = userCount > 10000 
-    ? `${(userCount / 1000).toFixed(1)}K` 
-    : userCount.toString();
-  
-  // Random tag generation (in a real app, these would come from the database)
-  const tags = ["AI Chat", "Virtual Assistant", "Roleplay"];
-  const randomTags = tags.sort(() => 0.5 - Math.random()).slice(0, 2);
+  // Generate star rating display
+  const ratingValue = typeof rating === 'string' ? parseFloat(rating) : rating;
+  const fullStars = Math.floor(ratingValue);
+  const hasHalfStar = ratingValue - fullStars >= 0.5;
   
   return (
-    <Link
-      href={`/projects/${slug}`}
-      className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
-    >
-      <div className="relative flex items-center p-4 bg-white">
-        <div className="relative h-12 w-12 flex-shrink-0">
-          <BlurImage
-            src={logo}
-            alt={name}
-            width={48}
-            height={48}
-            className="h-12 w-12 rounded-md border border-gray-200 bg-white p-1"
+    <Link href={`/projects/${slug}`} className="tool-card">
+      <div className="tool-card-header">
+        {image ? (
+          <Image 
+            src={image} 
+            alt={name} 
+            width={400} 
+            height={200} 
+            className="object-cover h-full w-full"
+            unoptimized
           />
-          {verified && (
-            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-white">
-              <CheckCircle className="h-3 w-3" />
+        ) : (
+          <div className={`h-full w-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+            <span className="text-3xl font-bold text-gray-700 opacity-30">
+              {name.charAt(0).toUpperCase()}
             </span>
-          )}
-        </div>
-        <div className="ml-3 flex-1">
-          <h3 className="font-display text-base font-medium text-gray-900 group-hover:text-indigo-600">
-            {name}
-          </h3>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <div className="flex items-center">
-              <Star className="mr-1 h-3 w-3 text-yellow-400" />
-              <span>{rating}</span>
-            </div>
-            <span className="text-gray-300">•</span>
-            <div className="flex items-center">
-              <Users className="mr-1 h-3 w-3 text-gray-400" />
-              <span>{formattedUserCount}</span>
-            </div>
           </div>
-        </div>
-        <div className="ml-auto flex flex-col items-end">
-          <div className="flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
-            <ThumbsUp className="mr-1 h-3 w-3" />
-            {clicks || 0}
-          </div>
-          <div className="mt-1 flex flex-wrap gap-1 justify-end">
-            {randomTags.map((tag, index) => (
-              <span key={index} className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
+        )}
+        {featured && (
+          <Badge className="absolute top-2 right-2 bg-secondary hover:bg-secondary">
+            Featured
+          </Badge>
+        )}
       </div>
       
-      <div className="flex-grow p-4 border-t border-gray-100">
-        <p className="line-clamp-2 text-sm text-gray-600">{description}</p>
-      </div>
-      
-      <div className="flex items-center justify-between bg-gray-50 px-4 py-2 text-xs text-gray-500">
-        <div className="flex items-center">
-          <Clock className="mr-1 h-3 w-3" />
-          <span>Added recently</span>
+      <div className="tool-card-content">
+        <div className="mb-1">
+          <Badge variant="outline" className="text-xs">
+            {getRandomCategory()}
+          </Badge>
         </div>
-        <div className="flex items-center text-indigo-600 font-medium">
-          <span>Visit site</span>
-          <ExternalLink className="ml-1 h-3 w-3" />
+        
+        <h3 className="tool-card-title">{name}</h3>
+        <p className="tool-card-description">{description}</p>
+        
+        <div className="tool-card-meta">
+          <div className="rating-stars">
+            <span className="mr-1 font-medium">{rating}</span>
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <StarIcon 
+                  key={i} 
+                  className={`w-3.5 h-3.5 ${
+                    i < fullStars 
+                      ? 'text-yellow-400 fill-yellow-400' 
+                      : i === fullStars && hasHalfStar 
+                        ? 'text-yellow-400 fill-yellow-400 opacity-50' 
+                        : 'text-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center">
+              <Users2Icon className="w-3.5 h-3.5 mr-1 text-gray-400" />
+              <span>{formatNumber(users)}</span>
+            </div>
+            <div className="flex items-center">
+              <ClockIcon className="w-3.5 h-3.5 mr-1 text-gray-400" />
+              <span>{formattedDate}</span>
+            </div>
+          </div>
         </div>
       </div>
     </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { cn } from "@dub/utils";
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -17,6 +17,8 @@ interface SearchResult {
   logo: string;
   category: string;
   verified: boolean;
+  features?: string[];
+  clicks?: number;
 }
 
 // 简化的BlurImage组件
@@ -96,33 +98,70 @@ export default function SearchBar() {
 
   useEffect(() => {
     const search = async () => {
-      if (!searchTerm) {
+      if (!searchTerm || searchTerm.trim() === '') {
         setResults([]);
         return;
       }
 
       setLoading(true);
       try {
+        const cleanedTerm = searchTerm.trim();
+        console.log(`搜索栏搜索: "${cleanedTerm}"`);
+        
         // 使用性能监控包装搜索功能
         const searchResults = await measureAsync(
           `SearchBar-PerformSearch`,
           async () => {
-            const { data, error } = await supabase
+            // 由于features是JSON类型，需要分别查询
+            const { data, error } = await supabaseAdmin
               .from('projects')
-              .select('id, name, description, slug, logo, category, verified')
-              .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`)
-              .eq('verified', true)
-              .order('clicks', { ascending: false })
-              .limit(20);
+              .select('id, name, description, slug, logo, category, verified, features')
+              .or(
+                `name.ilike.%${cleanedTerm}%,` +
+                `description.ilike.%${cleanedTerm}%,` +
+                `category.ilike.%${cleanedTerm}%`
+              )
+              .eq('verified', true);
 
             if (error) {
-              console.error('搜索失败:', error);
+              console.error('搜索文本字段失败:', error);
               return [];
+            }
+
+            // 查询features字段（JSON类型）
+            const { data: featuresData, error: featuresError } = await supabaseAdmin
+              .from('projects')
+              .select('id, name, description, slug, logo, category, verified, features')
+              .or(`features::text.ilike.%${cleanedTerm}%`)
+              .eq('verified', true);
+
+            if (featuresError) {
+              console.error('搜索features字段失败:', featuresError);
+            } else if (featuresData) {
+              // 合并两个结果，确保没有重复
+              const allIds = new Set(data.map(item => item.id));
+              for (const item of featuresData) {
+                if (!allIds.has(item.id)) {
+                  data.push(item);
+                  allIds.add(item.id);
+                }
+              }
+            }
+            
+            // 按点击量排序
+            data.sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
+            
+            console.log(`搜索结果数量: ${data?.length || 0}`);
+            if(data && data.length > 0) {
+              console.log('搜索结果项目名称:', data.map(item => item.name).join(', '));
+              if(data.length > 0 && data[0].features) {
+                console.log('第一个结果的features:', JSON.stringify(data[0].features));
+              }
             }
 
             return data as SearchResult[];
           },
-          { component: 'SearchBar', searchTerm }
+          { component: 'SearchBar', searchTerm: cleanedTerm }
         );
         
         setResults(searchResults);
