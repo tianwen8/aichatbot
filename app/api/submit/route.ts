@@ -242,14 +242,6 @@ export async function POST(request: Request) {
   console.log("=== 普通用户提交API调用 ===");
   console.log("时间:", new Date().toISOString());
   
-  // 设置CORS头
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json'
-  };
-  
   try {
     // 检查管理员权限
     const adminStatus = await isAdmin();
@@ -267,7 +259,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: false,
         errors: validationErrors
-      }, { status: 400, headers });
+      }, { status: 400 });
     }
     
     // 生成唯一ID和slug
@@ -311,13 +303,13 @@ export async function POST(request: Request) {
         return NextResponse.json({
           success: false,
           message: "项目标题已存在，请使用不同的标题"
-        }, { status: 409, headers });
+        }, { status: 409 });
       }
       
       return NextResponse.json({
         success: false,
         message: `保存项目失败: ${error.message}`
-      }, { status: 500, headers });
+      }, { status: 500 });
     }
     
     console.log(`项目 ${projectData.name} (ID: ${projectId}) 已成功提交，等待审核`);
@@ -331,17 +323,10 @@ export async function POST(request: Request) {
         name: projectData.name,
         slug: slug
       }
-    }, { headers });
-  } catch (error: any) {
-    console.error("Error processing submission request:", error);
-    console.error("Error stack:", error.stack);
-    return NextResponse.json(
-      { 
-        success: false, 
-        message: "Server error: " + (error.message || "Unknown error") 
-      },
-      { status: 500, headers }
-    );
+    }, { status: 200 });
+  } catch (error) {
+    console.error("提交处理失败:", error);
+    return NextResponse.json({ error: "提交失败，请稍后重试" }, { status: 500 });
   } finally {
     console.log("=== SUBMIT API COMPLETED ===");
   }
