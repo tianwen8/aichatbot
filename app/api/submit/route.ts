@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import { cookies } from 'next/headers';
+import { verifyAdminSession } from '../admin/auth/route';
 
 // Create Supabase client with server role permissions
 const supabaseAdmin = createClient(
@@ -238,10 +239,10 @@ async function isAdmin() {
 }
 
 export async function POST(request: Request) {
-  console.log("=== SUBMIT API CALLED ===");
-  console.log("Time:", new Date().toISOString());
+  console.log("=== 普通用户提交API调用 ===");
+  console.log("时间:", new Date().toISOString());
   
-  // Set CORS headers for developer clarity
+  // 设置CORS头
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -249,248 +250,84 @@ export async function POST(request: Request) {
     'Content-Type': 'application/json'
   };
   
-  // Handle preflight request
-  if (request.method === 'OPTIONS') {
-    return new NextResponse(null, { 
-      status: 204,
-      headers: headers
-    });
-  }
-  
   try {
-    console.log("Received project submission request...");
-    
-    // Check if user is admin first
-    const isAdminUser = await isAdmin();
-    console.log("Submission by admin:", isAdminUser);
-    
-    // Ensure projects table exists
-    console.log("Ensuring database table exists...");
+    // 确保projects表存在
     await ensureProjectsTable();
     
-    console.log("Parsing request data...");
-    let data;
+    // 解析请求体
+    const projectData = await request.json();
     
-    try {
-      // Get raw request body first
-      const requestText = await request.text();
-      console.log("Raw request body:", requestText.substring(0, 500) + (requestText.length > 500 ? '...' : ''));
-      
-      // Check if request body is empty
-      if (!requestText.trim()) {
-        console.error("Empty request body received");
-        return NextResponse.json(
-          { 
-            success: false, 
-            message: "Empty request body"
-          },
-          { status: 400, headers }
-        );
-      }
-      
-      // Then parse it
-      try {
-        data = JSON.parse(requestText);
-        console.log("API received submission data:", JSON.stringify(data, null, 2));
-      } catch (jsonError) {
-        console.error("JSON parse error:", jsonError);
-        console.error("Problematic JSON:", requestText);
-        return NextResponse.json(
-          { 
-            success: false, 
-            message: "Invalid JSON format: " + (jsonError as Error).message,
-            rawData: requestText.substring(0, 100)
-          },
-          { status: 400, headers }
-        );
-      }
-    } catch (parseError) {
-      console.error("Request processing error:", parseError);
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Failed to process request: " + (parseError as Error).message
-        },
-        { status: 400, headers }
-      );
-    }
-    
-    // Check if data is null or undefined
-    if (!data) {
-      console.error("Null or undefined data after parsing");
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "No data provided in request" 
-        },
-        { status: 400, headers }
-      );
-    }
-    
-    // Truncate meta_description if longer than 160 characters
-    if (data.meta_description && data.meta_description.length > 160) {
-      console.log("Meta description too long, truncating to 160 characters");
-      data.meta_description = data.meta_description.substring(0, 157) + "...";
-    }
-    
-    // Validate required fields
-    console.log("Validating required fields...");
-    const validationErrors = validateProjectData(data);
+    // 验证项目数据
+    const validationErrors = validateProjectData(projectData);
     if (validationErrors.length > 0) {
-      console.error("Validation failed, errors:", validationErrors);
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Validation failed", 
-          errors: validationErrors 
-        },
-        { status: 400, headers }
-      );
+      return NextResponse.json({
+        success: false,
+        errors: validationErrors
+      }, { status: 400, headers });
     }
     
-    // Format URL
-    console.log("Formatting URL...");
-    const validUrl = formatUrl(data.url);
-    
-    // Generate unique slug
-    console.log("Generating unique slug...");
-    const slug = generateUniqueSlug(data.name);
-    
-    // Prepare project data - remove fields that might cause issues
-    console.log("Preparing project data...");
-    
-    // Validate and prepare features
-    let features = [];
-    if (data.features) {
-      if (Array.isArray(data.features)) {
-        features = data.features;
-      } else if (typeof data.features === 'string') {
-        try {
-          features = JSON.parse(data.features);
-        } catch (e) {
-          console.warn("Failed to parse features string, using empty array", e);
-        }
-      } else {
-        console.warn("Features is not an array or string, using empty array");
-      }
-    }
-    console.log("Features processed:", JSON.stringify(features));
-    
-    // Validate and prepare stats
-    let stats = {};
-    if (data.stats) {
-      if (typeof data.stats === 'object' && data.stats !== null) {
-        stats = data.stats;
-      } else if (typeof data.stats === 'string') {
-        try {
-          stats = JSON.parse(data.stats);
-        } catch (e) {
-          console.warn("Failed to parse stats string, using empty object", e);
-        }
-      } else {
-        console.warn("Stats is not an object or string, using empty object");
-      }
-    }
-    console.log("Stats processed:", JSON.stringify(stats));
-    
-    // Ensure valid category
-    let category = data.category || "ai-tool";
-    // Validate that the category is valid, only accept a few categories
-    const validCategories = ["ai-character", "ai-chat", "ai-tool"];
-    if (!validCategories.includes(category)) {
-      console.log(`Invalid category "${category}", defaulting to "ai-tool"`);
-      category = "ai-tool";
-    }
-    console.log("Category set to:", category);
-    
+    // 生成唯一ID和slug
     const projectId = uuidv4();
-    const projectData = {
+    const slug = generateUniqueSlug(projectData.name);
+    
+    // 格式化URL
+    const url = formatUrl(projectData.url);
+    
+    // 构造项目对象 - 普通用户提交的项目默认为未验证状态
+    const project = {
       id: projectId,
-      name: data.name,
+      name: projectData.name,
       slug: slug,
-      description: data.description,
-      url: validUrl,
-      category: category,
-      logo: data.logo || null,
-      image: data.image || null,
-      keywords: data.keywords || null,
-      meta_description: data.meta_description || null,
-      features: features,
-      instructions: data.instructions || null,
-      stats: stats,
-      verified: isAdminUser, // 如果是管理员提交，直接设置为已验证
+      description: projectData.description,
+      url: url,
+      category: projectData.category || '',
+      keywords: projectData.keywords || '',
+      meta_description: projectData.meta_description || projectData.description.substring(0, 160),
+      logo: projectData.logo || '',
+      image: projectData.image || '',
+      gradient: projectData.gradient || '',
+      features: projectData.features || null,
+      instructions: projectData.instructions || '',
+      stats: projectData.stats || null,
+      verified: false, // 普通用户提交的项目默认为未验证状态，需要管理员审核
       stars: 0,
       clicks: 0,
-      gradient: data.gradient || "from-purple-100 via-violet-50 to-blue-100",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
     
-    console.log("Data being written to database:", JSON.stringify(projectData, null, 2));
+    // 插入项目数据
+    const { error } = await supabaseAdmin.from('projects').insert(project);
     
-    try {
-      // First check the table structure
-      console.log("Getting database table structure...");
-      const { data: columns, error: columnsError } = await supabaseAdmin.rpc('list_columns', {
-        table_name: 'projects'
-      });
+    if (error) {
+      console.error("保存项目失败:", error);
       
-      if (columnsError) {
-        console.error("Failed to get table structure:", columnsError);
-      } else {
-        console.log("Table column names:", columns.map((col: any) => col.column_name).join(', '));
+      // 检查是否为唯一约束错误（slug重复）
+      if (error.code === '23505' && error.message.includes('slug')) {
+        return NextResponse.json({
+          success: false,
+          message: "项目标题已存在，请使用不同的标题"
+        }, { status: 409, headers });
       }
       
-      // Insert data into projects table
-      console.log("Starting to insert data into projects table...");
-      console.log("Insert data ID:", projectId);
-      
-      const { data: insertedData, error } = await supabaseAdmin
-        .from("projects")
-        .insert([projectData])
-        .select();
-      
-      if (error) {
-        console.error("Supabase insert error:", error);
-        return NextResponse.json(
-          { 
-            success: false, 
-            message: "Database write failed: " + error.message,
-            error: error
-          },
-          { status: 500, headers }
-        );
-      }
-      
-      console.log("Project submission successful, ID:", projectId);
-      console.log("Inserted data:", insertedData ? JSON.stringify(insertedData) : "No data returned");
-      
-      // Return success response with needsApproval flag
       return NextResponse.json({
-        success: true,
-        message: isAdminUser ? "Project published successfully" : "Website submitted successfully and is pending approval",
-        data: {
-          slug: projectData.slug,
-          id: projectData.id,
-          needsApproval: !isAdminUser
-        }
-      }, { 
-        status: 200,
-        headers 
-      });
-    } catch (dbError: any) {
-      console.error("Database operation error:", dbError);
-      console.error("Error stack:", dbError.stack);
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Database operation error: " + (dbError.message || "Unknown database error"),
-          error: dbError
-        },
-        { status: 500, headers }
-      );
+        success: false,
+        message: `保存项目失败: ${error.message}`
+      }, { status: 500, headers });
     }
     
+    console.log(`项目 ${projectData.name} (ID: ${projectId}) 已成功提交，等待审核`);
+    
+    // 返回成功响应
+    return NextResponse.json({
+      success: true,
+      message: "项目已成功提交，等待审核",
+      project: {
+        id: projectId,
+        name: projectData.name,
+        slug: slug
+      }
+    }, { headers });
   } catch (error: any) {
     console.error("Error processing submission request:", error);
     console.error("Error stack:", error.stack);
