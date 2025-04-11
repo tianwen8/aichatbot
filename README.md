@@ -249,6 +249,17 @@ When deploying to Vercel or Cloudflare, configure the following environment vari
    - 根据网站分类提供针对性的内容建议
    - 添加了评分系统，提供SEO优化建议
 
+4. **修复Dub API分析区域显示问题 (2024年05月10日)**
+   - 项目详情页面中出现"Access Restricted"红框区域问题排查与修复
+   - 尝试方法：
+     1. 创建专门的CSS文件(`app/projects/[slug]/analytics-hide.css`)通过选择器隐藏红框
+     2. 实现JavaScript客户端组件(`app/projects/[slug]/layout-wrapper.tsx`)在DOM加载后动态查找和隐藏元素
+     3. 在全局CSS中添加更广泛的选择器来隐藏相关元素
+     4. 在页面组件中添加内联样式
+   - 发现问题：选择器过于激进，导致整个页面内容被隐藏
+   - 解决方法：删除额外的CSS文件和包装器组件，恢复页面正常显示，计划使用更精确的选择器重新实现
+   - 后续计划：创建一个仅针对特定Dub API相关元素的CSS文件，使用更精确的选择器和JavaScript检测逻辑
+
 ### 常见问题与排错指南
 
 1. **网站提交错误**
