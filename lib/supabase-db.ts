@@ -390,22 +390,40 @@ export async function searchProjects(
 }
 
 // 获取项目通过slug
-export async function getProject(slug: string): Promise<Project | null> {
+export async function getProject(slug: string): Promise<EnrichedProject | null> {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data: project, error: projectError } = await supabaseAdmin
       .from("projects")
       .select("*")
       .eq("slug", slug)
       .single();
 
-    if (error) {
-      console.error(`Failed to fetch project ${slug}:`, error);
+    if (projectError || !project) {
+      console.error("Error fetching project:", projectError);
       return null;
     }
-    
-    return data;
+
+    const { data: links, error: linksError } = await supabaseAdmin
+      .from("links")
+      .select("*")
+      .eq("project_id", project.id)
+      .order("order_num", { ascending: true });
+
+    if (linksError) {
+      console.error("Error fetching links:", linksError);
+      return null;
+    }
+
+    const enrichedProject: EnrichedProject = {
+      ...project,
+      links: links || [],
+      githubLink: links?.find(link => link.type === 'GITHUB'),
+      websiteLink: links?.find(link => link.type === 'WEBSITE')
+    };
+
+    return enrichedProject;
   } catch (error) {
-    console.error(`Error fetching project ${slug}:`, error);
+    console.error("Error in getProject:", error);
     return null;
   }
 }
