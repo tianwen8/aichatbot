@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import { cookies } from 'next/headers';
-import { verifyAdminSession } from '../admin/auth/route';
 
 // Create Supabase client with server role permissions
 const supabaseAdmin = createClient(
