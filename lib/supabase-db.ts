@@ -37,8 +37,26 @@ export async function createTables() {
     
     if (projectsError) {
       console.error('创建projects表失败:', projectsError);
-      // 尝试直接在SQL编辑器中运行
-      console.log('请在Supabase的SQL编辑器中手动运行创建表的SQL语句');
+    }
+    
+    // 创建users表
+    const { error: usersError } = await supabaseAdmin.rpc('exec_sql', {
+      sql: `
+        CREATE TABLE IF NOT EXISTS public.users (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          username TEXT UNIQUE NOT NULL,
+          email TEXT UNIQUE NOT NULL,
+          email_verified TIMESTAMP WITH TIME ZONE,
+          image TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+        );
+      `
+    });
+    
+    if (usersError) {
+      console.error('创建users表失败:', usersError);
     }
     
     // 创建links表
@@ -63,25 +81,22 @@ export async function createTables() {
       console.error('创建links表失败:', linksError);
     }
     
-    // 创建计数器函数
-    const { error: counterError } = await supabaseAdmin.rpc('exec_sql', {
+    // 创建project_users表
+    const { error: projectUsersError } = await supabaseAdmin.rpc('exec_sql', {
       sql: `
-        CREATE OR REPLACE FUNCTION increment_counter(row_id TEXT)
-        RETURNS INTEGER AS $$
-        DECLARE
-          current_value INTEGER;
-        BEGIN
-          -- 获取当前值
-          SELECT clicks INTO current_value FROM public.projects WHERE id = row_id;
-          -- 返回增加后的值
-          RETURN current_value + 1;
-        END;
-        $$ LANGUAGE plpgsql;
+        CREATE TABLE IF NOT EXISTS public.project_users (
+          id TEXT PRIMARY KEY,
+          role TEXT NOT NULL,
+          project_id TEXT NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+          UNIQUE(project_id, user_id)
+        );
       `
     });
     
-    if (counterError) {
-      console.error('创建计数器函数失败:', counterError);
+    if (projectUsersError) {
+      console.error('创建project_users表失败:', projectUsersError);
     }
     
     return true;

@@ -2,15 +2,49 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { useProjectContext } from "@/components/projects/project-context";
+import { useProjectContext, ProjectProvider } from "@/components/projects/project-context";
 import { Button } from "@/components/ui/button";
 import { PenLine, Plus, Calendar, Eye, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase-client";
+import { getProject } from "@/lib/actions/get-project";
 
 export default function ArticlesPage() {
   const { slug } = useParams();
-  const project = useProjectContext();
+  const [project, setProject] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   
+  useEffect(() => {
+    async function loadProject() {
+      try {
+        const data = await getProject({ slug: slug as string });
+        setProject(data);
+      } catch (error) {
+        console.error("加载项目失败:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadProject();
+  }, [slug]);
+  
+  if (isLoading) {
+    return <div>加载中...</div>;
+  }
+  
+  if (!project) {
+    return <div>项目不存在</div>;
+  }
+  
+  return (
+    <ProjectProvider props={project}>
+      <ArticlesContent />
+    </ProjectProvider>
+  );
+}
+
+function ArticlesContent() {
+  const project = useProjectContext();
   const [articles, setArticles] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
