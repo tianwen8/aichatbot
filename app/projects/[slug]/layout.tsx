@@ -12,6 +12,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { measureAsync } from "@/lib/performance";
+import { Link } from "@/lib/supabase-db";
 
 export const revalidate = 43200;
 
@@ -84,10 +85,17 @@ export default async function ProjectLayout({
     console.warn(`更新点击次数失败: ${err}`);
   }
 
-  // 为组件创建必要的属性
-  const mockGithubLink = project.websiteLink || {
+  // 获取项目相关链接
+  const { data: links = [] } = await supabaseAdmin
+    .from('links')
+    .select('*')
+    .eq('project_id', project.id);
+
+  // 查找网站链接和GitHub链接
+  const websiteLink = links.find(link => link.type === 'WEBSITE') || null;
+  const githubLink = links.find(link => link.type === 'GITHUB') || {
     id: "mock",
-    type: "WEBSITE",
+    type: "GITHUB",
     url: "",
     short_link: "#",
     order: 0,
@@ -98,7 +106,9 @@ export default async function ProjectLayout({
 
   const enrichedProject = {
     ...project,
-    githubLink: mockGithubLink, // 添加必要的githubLink属性
+    links,
+    githubLink,
+    websiteLink,
     users: [],
     clicks: currentClicks
   };
@@ -108,60 +118,7 @@ export default async function ProjectLayout({
 
   return (
     <ProjectProvider props={enrichedProject}>
-      <div
-        className={cn(
-          "relative aspect-[4/1] w-full rounded-t-2xl bg-gradient-to-tr",
-          project.gradient,
-        )}
-      >
-        <Suspense>
-          <EditGradientPopover project={enrichedProject} />
-        </Suspense>
-      </div>
-      <div className="relative -mt-8 flex items-center justify-between px-4 sm:-mt-12 sm:items-end md:pr-0">
-        <Image
-          src={project.logo}
-          alt={project.name}
-          width={100}
-          height={100}
-          className="h-16 w-16 rounded-full bg-white p-2 sm:h-24 sm:w-24"
-        />
-        <div className="flex items-center space-x-2 py-2">
-          <Suspense>
-            <EditProjectButton project={enrichedProject} />
-          </Suspense>
-          {project.websiteLink && (
-            <a
-              href={project.websiteLink.short_link}
-              target="_blank"
-              className={buttonLinkVariants()}
-            >
-              <Globe className="h-4 w-4" />
-              <p className="text-sm">访问网站</p>
-            </a>
-          )}
-        </div>
-      </div>
-      <div className="max-w-lg p-4 pb-0">
-        <div className="flex items-center space-x-2">
-          <h1 className="font-display text-3xl font-bold">{project.name}</h1>
-          {project.verified && (
-            <BadgeCheck className="h-8 w-8 text-white" fill="#1c9bef" />
-          )}
-        </div>
-        <p className="mt-2 text-gray-500">{project.description}</p>
-        <p className="mt-1 text-xs text-gray-400">访问次数: {currentClicks}</p>
-        
-        {/* 添加性能信息 */}
-        <div className="mt-2 text-xs text-gray-400">
-          数据加载耗时: {dbEndTime - dbStartTime}ms | 
-          总渲染耗时: {endTime - startTime}ms
-        </div>
-      </div>
-
-      <ProjectLayoutTabs />
-
-      <div className="relative mx-4 flex min-h-[22rem] items-center justify-center rounded-xl border border-gray-200 bg-white p-4">
+      <div className="relative mx-4">
         {children}
       </div>
     </ProjectProvider>
