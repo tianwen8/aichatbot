@@ -205,9 +205,6 @@ async function verifyAdminSession(request: NextRequest) {
   return now < expiryDate;
 }
 
-// Export the verification function for use in other routes
-export { verifyAdminSession };
-
 // Admin login
 export async function POST(request: NextRequest) {
   try {

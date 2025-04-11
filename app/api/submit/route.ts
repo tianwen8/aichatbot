@@ -206,11 +206,11 @@ async function isAdmin() {
       return false;
     }
     
-    // Verify session in database - 修改为字符串类型比较
+    // Verify session in database
     const { data: session, error } = await supabaseAdmin
       .from('admin_sessions')
       .select('*')
-      .eq('id', sessionId)
+      .eq('session_id', sessionId)
       .single();
     
     if (error) {
