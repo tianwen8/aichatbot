@@ -4,79 +4,79 @@
 
 @layer base {
   :root {
-    /* Pink - Closer to the pink in the screenshot */
-    --primary-hue: 340;
-    --primary-saturation: 85%;
-    --primary-lightness: 65%;
+    /* 淡粉色作为主色调 - 外国女生喜欢的柔和粉红色 */
+    --primary-hue: 350;
+    --primary-saturation: 65%;
+    --primary-lightness: 70%;
     --primary: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
-    --primary-light: var(--primary-hue) var(--primary-saturation) 92%;
+    --primary-light: var(--primary-hue) var(--primary-saturation) 95%;
     --primary-foreground: 0 0% 100%;
     
-    /* Teal blue - Closer to the blue in the screenshot */
-    --secondary-hue: 190;
-    --secondary-saturation: 80%;
-    --secondary-lightness: 50%;
+    /* 薄荷绿作为辅助色 - 清新和舒适 */
+    --secondary-hue: 160;
+    --secondary-saturation: 55%;
+    --secondary-lightness: 65%;
     --secondary: var(--secondary-hue) var(--secondary-saturation) var(--secondary-lightness);
-    --secondary-light: var(--secondary-hue) var(--secondary-saturation) 90%;
+    --secondary-light: var(--secondary-hue) var(--secondary-saturation) 92%;
     --secondary-foreground: 0 0% 100%;
     
-    /* Blue as accent color */
-    --accent-hue: 205;
-    --accent-saturation: 70%;
-    --accent-lightness: 60%;
+    /* 天蓝色作为强调色 - 创造平衡感 */
+    --accent-hue: 195;
+    --accent-saturation: 60%;
+    --accent-lightness: 65%;
     --accent: var(--accent-hue) var(--accent-saturation) var(--accent-lightness);
     --accent-light: var(--accent-hue) var(--accent-saturation) 92%;
     --accent-foreground: 0 0% 100%;
     
-    /* Neutral colors */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* 淡雅中性色调 - 提供舒适的阅读体验 */
+    --background: 30 20% 98%;
+    --foreground: 220 25% 20%;
     
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47% 11.2%;
+    --card-foreground: 220 25% 20%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47% 11.2%;
+    --popover-foreground: 220 25% 20%;
     
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 96.1%;
+    --muted-foreground: 220 10% 46.9%;
     
-    --border: 214.3 31.8% 91.4%;
+    --border: 220 13% 91%;
     --border-border: hsl(var(--border));
     
-    --input: 214.3 31.8% 91.4%;
+    --input: 220 13% 91%;
     --input-focus: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
     
     --ring: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
     
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* 增加圆角半径，使UI更柔和 */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 25% 10%;
+    --foreground: 210 20% 98%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 25% 15%;
+    --card-foreground: 210 20% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 25% 15%;
+    --popover-foreground: 210 20% 98%;
 
     --primary: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 210 20% 98%;
 
     --secondary: var(--secondary-hue) var(--secondary-saturation) var(--secondary-lightness);
-    --secondary-foreground: 210 40% 98%;
+    --secondary-foreground: 210 20% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 15% 25%;
+    --muted-foreground: 210 10% 70%;
 
     --accent: var(--accent-hue) var(--accent-saturation) var(--accent-lightness);
-    --accent-foreground: 210 40% 98%;
+    --accent-foreground: 210 20% 98%;
 
-    --border: 217.2 32.6% 17.5%;
+    --border: 220 15% 25%;
     --border-border: hsl(var(--border));
-    --input: 217.2 32.6% 17.5%;
+    --input: 220 15% 25%;
 
     --ring: var(--primary-hue) var(--primary-saturation) var(--primary-lightness);
   }
@@ -943,4 +943,106 @@ h1, h2, h3, h4, h5, h6 {
   padding-top: 0;
 }
 
-/* 删除这里之前添加的用于隐藏元素的样式 */
+/* 添加更现代化的卡片样式 */
+.modern-card {
+  @apply bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300;
+}
+
+/* 更精致的按钮样式 */
+.btn-modern {
+  @apply rounded-full px-6 py-2 font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-md;
+}
+
+.btn-primary-modern {
+  @apply bg-gradient-to-r from-[hsl(var(--primary-hue),var(--primary-saturation),var(--primary-lightness))] to-[hsl(calc(var(--primary-hue)+10),var(--primary-saturation),calc(var(--primary-lightness)-5%))] text-white hover:from-[hsl(var(--primary-hue),var(--primary-saturation),calc(var(--primary-lightness)-5%))] hover:to-[hsl(calc(var(--primary-hue)+10),var(--primary-saturation),var(--primary-lightness))];
+}
+
+.btn-secondary-modern {
+  @apply bg-gradient-to-r from-[hsl(var(--secondary-hue),var(--secondary-saturation),var(--secondary-lightness))] to-[hsl(calc(var(--secondary-hue)+10),var(--secondary-saturation),calc(var(--secondary-lightness)-5%))] text-white hover:from-[hsl(var(--secondary-hue),var(--secondary-saturation),calc(var(--secondary-lightness)-5%))] hover:to-[hsl(calc(var(--secondary-hue)+10),var(--secondary-saturation),var(--secondary-lightness))];
+}
+
+.btn-outline-modern {
+  @apply border-2 border-gray-200 text-gray-700 hover:border-[hsl(var(--primary-hue),var(--primary-saturation),var(--primary-lightness))] hover:text-[hsl(var(--primary-hue),var(--primary-saturation),var(--primary-lightness))];
+}
+
+/* 精致的输入框 */
+.input-modern {
+  @apply border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary-hue),var(--primary-saturation),var(--primary-lightness),0.3)] focus:border-[hsl(var(--primary-hue),var(--primary-saturation),var(--primary-lightness))] transition-all duration-300;
+}
+
+/* 现代化的徽章样式 */
+.badge-modern {
+  @apply rounded-full px-3 py-1 text-xs font-medium bg-opacity-15 transition-all duration-300;
+}
+
+.badge-primary-modern {
+  @apply bg-[hsl(var(--primary-hue),var(--primary-saturation),var(--primary-lightness),0.15)] text-[hsl(var(--primary-hue),var(--primary-saturation),40%)];
+}
+
+.badge-secondary-modern {
+  @apply bg-[hsl(var(--secondary-hue),var(--secondary-saturation),var(--secondary-lightness),0.15)] text-[hsl(var(--secondary-hue),var(--secondary-saturation),40%)];
+}
+
+.badge-accent-modern {
+  @apply bg-[hsl(var(--accent-hue),var(--accent-saturation),var(--accent-lightness),0.15)] text-[hsl(var(--accent-hue),var(--accent-saturation),40%)];
+}
+
+/* 统一的过渡效果 */
+.transition-modern {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* 精致的容器样式 */
+.container-modern {
+  @apply px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto;
+}
+
+/* 现代化的导航栏样式 */
+.navbar-modern {
+  @apply sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-100 transition-all duration-300;
+}
+
+/* 精致的标题样式 */
+.heading-modern {
+  @apply font-bold text-gray-900 tracking-tight;
+}
+
+.heading-gradient {
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-[hsl(var(--primary-hue),var(--primary-saturation),35%)] to-[hsl(var(--secondary-hue),var(--secondary-saturation),35%)];
+}
+
+/* 现代化的网格布局 */
+.grid-modern {
+  @apply grid gap-6 sm:gap-8;
+}
+
+/* 温柔的阴影效果 */
+.shadow-soft {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+}
+
+.shadow-soft-hover:hover {
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+}
+
+@layer utilities {
+  .hover\:shadow-soft-hover:hover {
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+  }
+}
+
+/* 更精致的项目卡片 */
+.project-card-modern {
+  @apply overflow-hidden bg-white rounded-xl border border-gray-100 transition-all duration-300;
+}
+.project-card-modern:hover {
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+}
+
+/* 更新标准卡片样式 */
+.card {
+  @apply bg-white rounded-xl border border-gray-100 shadow-soft transition-all duration-300 overflow-hidden;
+}
+.card:hover {
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+}
