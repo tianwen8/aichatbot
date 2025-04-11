@@ -186,7 +186,7 @@ function setSessionCookie(sessionId: string) {
 }
 
 // Check if session is valid
-async function isValidSession(request: NextRequest) {
+async function verifyAdminSession(request: NextRequest) {
   const sessionId = request.cookies.get('admin_session')?.value;
   if (!sessionId) return false;
   
@@ -255,16 +255,8 @@ export async function POST(request: NextRequest) {
 
 // Check current authentication status
 export async function GET(request: NextRequest) {
-  try {
-    // Ensure tables exist before checking session
-    await ensureAdminSessionsTable();
-    
-    const isAuthenticated = await isValidSession(request);
-    return NextResponse.json({ authenticated: isAuthenticated });
-  } catch (error) {
-    console.error('Failed to check authentication status:', error);
-    return NextResponse.json({ authenticated: false });
-  }
+  const isValid = await verifyAdminSession(request);
+  return NextResponse.json({ isAuthenticated: isValid });
 }
 
 // Admin logout
@@ -284,124 +276,5 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('Logout failed:', error);
     return NextResponse.json({ success: false, message: 'Logout failed' }, { status: 500 });
-  }
-}
-
-// 新增：验证管理员会话函数
-export async function verifyAdminSession() {
-  try {
-    // 获取会话cookie
-    const cookieStore = cookies();
-    const sessionId = cookieStore.get('admin_session')?.value;
-    
-    if (!sessionId) {
-      console.log("No admin session cookie found");
-      return false;
-    }
-    
-    // 仔细调试当前的会话ID
-    console.log("Verifying admin session with ID:", sessionId);
-    
-    // 创建一个客户端实例用于验证
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    );
-    
-    // 尝试列出所有会话以进行调试
-    const { data: allSessions, error: sessionsError } = await supabaseAdmin
-      .from('admin_sessions')
-      .select('*')
-      .limit(5);
-    
-    if (sessionsError) {
-      console.error("Error listing admin sessions:", sessionsError);
-    } else {
-      console.log(`Found ${allSessions?.length || 0} admin sessions`);
-      if (allSessions && allSessions.length > 0) {
-        console.log("Recent sessions:", allSessions.map(s => ({
-          id: s.id,
-          session_id: s.session_id,
-          expires_at: s.expires_at
-        })));
-      }
-    }
-    
-    // 从数据库验证会话 - 尝试所有可能的字段
-    const { data: sessionById, error: errorById } = await supabaseAdmin
-      .from('admin_sessions')
-      .select('*')
-      .eq('id', sessionId)
-      .maybeSingle();
-    
-    const { data: sessionBySessionId, error: errorBySessionId } = await supabaseAdmin
-      .from('admin_sessions')
-      .select('*')
-      .eq('session_id', sessionId)
-      .maybeSingle();
-    
-    // 检查哪种查询方式找到了会话
-    let session = null;
-    let queryType = '';
-    
-    if (sessionById) {
-      console.log("Found session by ID field");
-      session = sessionById;
-      queryType = 'id';
-    } else if (sessionBySessionId) {
-      console.log("Found session by session_id field");
-      session = sessionBySessionId;
-      queryType = 'session_id';
-    }
-    
-    // 如果两种方式都没找到，记录错误
-    if (!session) {
-      console.error("No session found with either ID or session_id:", sessionId);
-      console.log("Error by ID:", errorById);
-      console.log("Error by session_id:", errorBySessionId);
-      return false;
-    }
-    
-    console.log(`Found session using ${queryType} field:`, {
-      id: session.id,
-      session_id: session.session_id,
-      username: session.username,
-      expires_at: session.expires_at
-    });
-    
-    // 检查会话是否过期
-    const now = new Date();
-    if (new Date(session.expires_at) < now) {
-      console.log("Admin session expired");
-      return false;
-    }
-    
-    console.log("Admin session verified successfully");
-    
-    // 延长会话过期时间
-    try {
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24); // 延长24小时
-      
-      await supabaseAdmin
-        .from('admin_sessions')
-        .update({ expires_at: expiresAt.toISOString() })
-        .eq(queryType, sessionId);
-      
-      console.log("Extended session expiry time");
-    } catch (updateError) {
-      console.warn("Failed to extend session expiry:", updateError);
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Error verifying admin session:", error);
-    return false;
   }
 } 
