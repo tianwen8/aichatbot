@@ -115,7 +115,7 @@ export default function SearchBar() {
             // 由于features是JSON类型，需要分别查询
             const { data, error } = await supabaseAdmin
               .from('projects')
-              .select('id, name, description, slug, logo, category, verified, features')
+              .select('id, name, description, slug, logo, category, verified, features, clicks')
               .or(
                 `name.ilike.%${cleanedTerm}%,` +
                 `description.ilike.%${cleanedTerm}%,` +
@@ -131,7 +131,7 @@ export default function SearchBar() {
             // 查询features字段（JSON类型）
             const { data: featuresData, error: featuresError } = await supabaseAdmin
               .from('projects')
-              .select('id, name, description, slug, logo, category, verified, features')
+              .select('id, name, description, slug, logo, category, verified, features, clicks')
               .or(`features::text.ilike.%${cleanedTerm}%`)
               .eq('verified', true);
 
