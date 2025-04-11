@@ -251,6 +251,10 @@ export async function POST(request: Request) {
   };
   
   try {
+    // 检查管理员权限
+    const adminStatus = await isAdmin();
+    console.log("管理员状态:", adminStatus);
+
     // 确保projects表存在
     await ensureProjectsTable();
     
