@@ -113,6 +113,40 @@ export default async function Home({ params, searchParams }: Props) {
         </div>
       </section>
 
+      {/* Featured AI Characters */}
+      <section className="py-12 bg-gray-50">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <Badge className="mb-2 bg-secondary/10 text-secondary hover:bg-secondary/20">
+                <SparklesIcon className="h-3 w-3 mr-1" />
+                Featured Selection
+              </Badge>
+              <h2 className="text-2xl font-bold tracking-tight text-gray-900">Featured AI Characters</h2>
+              <p className="mt-2 text-gray-600">Discover our handpicked selection of the most engaging AI characters</p>
+            </div>
+            <Link
+              href="/featured"
+              className="text-sm font-medium text-primary hover:text-primary/80 flex items-center"
+            >
+              View all featured
+              <ArrowRight className="ml-1 inline-block h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredProjects.slice(0, 3).map((project) => (
+              <ProjectCard
+                key={project.slug}
+                {...project}
+                gradient="from-purple-100 via-violet-50 to-blue-100"
+                featured={true}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Categories Section */}
       <section className="py-12 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -296,42 +330,8 @@ export default async function Home({ params, searchParams }: Props) {
         </div>
       </section>
 
-      {/* Featured AI Characters */}
-      <section className="py-12 bg-gray-50">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <Badge className="mb-2 bg-secondary/10 text-secondary hover:bg-secondary/20">
-                <SparklesIcon className="h-3 w-3 mr-1" />
-                Featured Selection
-              </Badge>
-              <h2 className="text-2xl font-bold tracking-tight text-gray-900">Featured AI Characters</h2>
-              <p className="mt-2 text-gray-600">Discover our handpicked selection of the most engaging AI characters</p>
-            </div>
-            <Link
-              href="/featured"
-              className="text-sm font-medium text-primary hover:text-primary/80 flex items-center"
-            >
-              View all featured
-              <ArrowRight className="ml-1 inline-block h-4 w-4" />
-            </Link>
-          </div>
-
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredProjects.slice(0, 3).map((project) => (
-              <ProjectCard
-                key={project.slug}
-                {...project}
-                gradient="from-purple-100 via-violet-50 to-blue-100"
-                featured={true}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* All AI Characters */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-gray-50">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -356,7 +356,7 @@ export default async function Home({ params, searchParams }: Props) {
                 gradient="from-blue-100 via-cyan-50 to-teal-100"
               />
             ))}
-      </div>
+          </div>
 
           <div className="mt-8 text-center">
             <Button asChild className="rounded-full px-8" size="lg">
@@ -411,6 +411,6 @@ export default async function Home({ params, searchParams }: Props) {
           </div>
         </div>
       </section>
-      </div>
+    </div>
   );
 }
