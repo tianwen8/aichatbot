@@ -254,22 +254,45 @@ export async function getVerifiedProjects(count = 12, category?: string): Promis
   }
 }
 
+// 页面类别到数据库类别的映射
+const categoryMap = {
+  'ai-character': 'ai-character',
+  'ai-characters': 'ai-character',  // 添加复数形式的映射
+  'ai-chat': 'ai-chat',
+  'ai-tools': 'ai-tool',
+  // 添加更多映射
+};
+
 // 按类别获取项目
 export async function getProjectsByCategory(category: string, count = 12): Promise<Project[]> {
   try {
-    const { data, error } = await supabaseAdmin
+    // 将页面类别映射到数据库类别
+    const dbCategory = categoryMap[category] || category;
+    
+    console.log(`Fetching projects for category ${category} (DB category: ${dbCategory})`);
+    
+    let query = supabaseAdmin
       .from("projects")
       .select("*")
-      .eq("verified", true)
-      .eq("category", category)
-      .order("created_at", { ascending: false })
+      .eq("verified", true);
+    
+    // 如果类别不是'all'，则添加类别过滤条件
+    if (category !== 'all') {
+      query = query.eq("category", dbCategory);
+    }
+    
+    // 添加排序和限制条件
+    query = query.order("created_at", { ascending: false })
       .limit(count);
+    
+    const { data, error } = await query;
 
     if (error) {
       console.error(`Failed to fetch projects for category ${category}:`, error);
       return [];
     }
     
+    console.log(`Found ${data?.length || 0} projects for category ${category}`);
     return data || [];
   } catch (error) {
     console.error(`Error fetching projects for category ${category}:`, error);
