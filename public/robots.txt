@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://aidirectory.example.com/sitemap.xml 
+Sitemap: https://www.perai.shop/sitemap.xml 
