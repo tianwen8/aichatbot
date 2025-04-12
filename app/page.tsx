@@ -18,9 +18,9 @@ type Props = {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
-    title: "AI Character Directory - Find the Best AI Characters, Chat Bots & Tools",
-    description: "Discover and chat with the best AI characters, virtual companions, and roleplay bots. Your gateway to meaningful AI conversations.",
-    keywords: "AI chat, virtual assistants, AI characters, chatbots, AI companions, roleplay, AI tools"
+    title: "AI Character & Virtual Companion Directory - Find Your Perfect AI Partner",
+    description: "Discover the best AI girlfriends, virtual companions, and AI characters for meaningful conversations and companionship. Compare features, user ratings and pricing.",
+    keywords: "AI girlfriend, AI waifu, virtual companions, AI characters, chatbots, roleplay, virtual dating, AI companion, digital girlfriend, romantic AI chat"
   };
 }
 
@@ -56,28 +56,95 @@ export default async function Home({ params, searchParams }: Props) {
   
   console.log(`Homepage data loading completed in ${Date.now() - startTime}ms`);
 
+  // 构建首页结构化数据
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://aichatbot-tianwen8.vercel.app/",
+    "name": "AI Character Directory - Find the Best AI Characters, Chat Bots & Tools",
+    "description": "Discover and chat with the best AI characters, virtual companions, and roleplay bots. Your gateway to meaningful AI conversations.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://aichatbot-tianwen8.vercel.app/search?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  // FAQ结构化数据
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What are AI Companions and Virtual Girlfriends?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AI companions and virtual girlfriends are artificial intelligence personas designed to simulate romantic relationships and companionship. Using advanced language models, they can create emotional connections through interactive conversation, remembering your preferences and adapting to your personality."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are AI Companion relationships healthy?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AI companions can provide emotional support, reduce loneliness, and offer a judgment-free space for expression. While they shouldn't replace human relationships entirely, they can complement your social life, especially for those with social anxiety or limited social opportunities."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are AI Companions and Virtual Girlfriends free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Many AI companion platforms offer free basic tiers with limited features and conversation quotas. Premium subscriptions typically range from $5-30 monthly, providing unlimited conversations, enhanced personalities, voice chat capabilities, and image generation features."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I choose the right AI Companion for me?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Consider what you're looking for in a companion: personality type, interests, conversation style, and available features. Our directory allows you to compare AI companions across different platforms, read user reviews, and find the perfect match for your companionship needs."
+        }
+      }
+    ]
+  };
+
   return (
     <div>
+      {/* JSON-LD 结构化数据 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      
       {/* Hero Section - 更现代化的设计 */}
       <section className="py-16 sm:py-20 bg-gradient-to-b from-[hsl(var(--background))] to-white">
         <div className="container-modern">
           <div className="text-center">
             <Badge className="mb-4 badge-modern badge-primary-modern px-4 py-1.5 text-sm">
               <SparklesIcon className="h-3.5 w-3.5 mr-1" />
-              Discover the Best AI Characters & Tools
+              Find Your Perfect AI Companion
             </Badge>
             
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              Find Your Favorite
+              Discover Your Ideal
               <br />
               <span className="heading-gradient">
-                AI Characters
+                AI Girlfriend
               </span>
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
-              Discover the best AI characters, chat tools and virtual companions
+              Compare the best AI companions, virtual girlfriends, and romantic AI characters
               <br />
-              all in one place.
+              all in one directory.
             </p>
             
             {/* Main Search Box - 更精致的设计 */}
@@ -383,7 +450,7 @@ export default async function Home({ params, searchParams }: Props) {
               <Button variant="outline" asChild size="lg" className="btn-modern border-white text-white hover:bg-white/10">
                 <Link href="/about">Learn More</Link>
               </Button>
-      </div>
+            </div>
 
             {/* 装饰背景元素 */}
             <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-white/5 blur-3xl"></div>
@@ -415,6 +482,6 @@ export default async function Home({ params, searchParams }: Props) {
           </div>
         </div>
       </section>
-      </div>
+    </div>
   );
 }

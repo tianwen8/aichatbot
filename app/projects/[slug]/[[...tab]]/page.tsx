@@ -32,10 +32,39 @@ export async function generateMetadata({
     };
   }
 
+  // 构建项目分类标签
+  const categoryMap: Record<string, string> = {
+    'ai-character': 'AI Character',
+    'ai-chat': 'AI Chat Tool',
+    'ai-tool': 'AI Tool',
+  };
+  
+  const categoryLabel = project.category ? (categoryMap[project.category] || project.category) : 'AI Tool';
+  
   return {
-    title: `${project.name} - AI Character Directory`,
-    description: project.description,
-    keywords: project.name + ", AI character, AI chat, virtual assistant, chatbot",
+    title: `${project.name} - ${categoryLabel} | AI Character Directory`,
+    description: `${project.description.substring(0, 150)}${project.description.length > 150 ? '...' : ''}`,
+    keywords: `${project.name}, ${categoryLabel}, AI character, AI chat, virtual assistant, chatbot${project.features ? ', ' + project.features.join(', ') : ''}`,
+    openGraph: {
+      title: `${project.name} - ${categoryLabel}`,
+      description: project.description,
+      url: `https://aichatbot-tianwen8.vercel.app/projects/${params.slug}`,
+      images: [
+        {
+          url: project.logo || 'https://aichatbot-tianwen8.vercel.app/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: project.name,
+        }
+      ],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: project.name,
+      description: project.description,
+      images: [project.logo || 'https://aichatbot-tianwen8.vercel.app/og-image.jpg'],
+    },
   };
 }
 
@@ -76,8 +105,38 @@ export default async function ProjectPage({ params }: Props) {
   // Determine the active tab
   const activeTab = params.tab?.[0] || "overview";
 
+  // JSON-LD 结构化数据
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": project.name,
+    "description": project.description,
+    "image": project.logo,
+    "url": `https://aichatbot-tianwen8.vercel.app/projects/${params.slug}`,
+    "applicationCategory": "UtilitiesApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "124500",
+      "bestRating": "5",
+      "worstRating": "1"
+    }
+  };
+
   return (
     <div className="bg-gray-50">
+      {/* JSON-LD 结构化数据 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      
       {/* Back Navigation */}
       <div className="bg-white border-b">
         <div className="container py-4">

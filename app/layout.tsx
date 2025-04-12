@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "AI Character Chat Directory - Find Your Favorite AI Characters",
-  description: "Discover the best AI characters, chat tools and virtual companions all in one place.",
+  title: "AI Character & Virtual Companion Directory - Find Your Perfect AI Partner",
+  description: "Discover the best AI characters, virtual companions, and AI girlfriends. Compare and find your ideal AI chat partner for meaningful conversations and companionship.",
+  metadataBase: new URL('https://aichatbot-tianwen8.vercel.app'),
 };
 
 export default function RootLayout({
@@ -21,10 +22,10 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta 
           name="keywords" 
-          content="AI chat, virtual assistants, AI characters, chatbots, AI companions, roleplay" 
+          content="AI girlfriend, AI companion, AI waifu, virtual girlfriend, AI characters, chatbots, roleplay, AI lover, digital companion, AI chat partner, AI dating, virtual companionship" 
         />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://aidirectory.example.com" />
+        <link rel="canonical" href="https://aichatbot-tianwen8.vercel.app" />
         <link rel="icon" href="/logo.ico" />
         <link rel="apple-touch-icon" href="/logo.jpeg" />
         <link rel="icon" type="image/png" sizes="16x16" href="/logo16.png" />
@@ -32,8 +33,15 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="192x192" href="/logo192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/logo512.png" />
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="AI Character Chat Directory" />
+        <meta property="og:site_name" content="AI Character & Virtual Companion Directory" />
+        <meta property="og:title" content="AI Character & Virtual Companion Directory - Find Your Perfect AI Partner" />
+        <meta property="og:description" content="Discover the best AI characters, virtual companions, and AI girlfriends. Compare and find your ideal AI chat partner." />
+        <meta property="og:url" content="https://aichatbot-tianwen8.vercel.app" />
+        <meta property="og:image" content="https://aichatbot-tianwen8.vercel.app/og-image.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="AI Character & Virtual Companion Directory" />
+        <meta name="twitter:description" content="Discover the best AI characters, virtual companions, and AI girlfriends" />
+        <meta name="twitter:image" content="https://aichatbot-tianwen8.vercel.app/og-image.jpg" />
         
         {/* JSON-LD structured data */}
         <script
@@ -42,9 +50,17 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              "name": "AI Character Chat Directory",
-              "description": "Directory of AI characters, virtual companions, and chatbots",
-              "url": "https://example.com",
+              "name": "AI Character & Virtual Companion Directory",
+              "description": "Directory of AI characters, virtual companions, and AI girlfriends",
+              "url": "https://aichatbot-tianwen8.vercel.app",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://aichatbot-tianwen8.vercel.app/search?q={search_term_string}"
+                },
+                "query-input": "required name=search_term_string"
+              }
             }),
           }}
         />
