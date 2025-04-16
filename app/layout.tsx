@@ -2,6 +2,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import GoogleAnalytics from "../src/components/GoogleAnalytics";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <GoogleAnalytics />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta 
           name="keywords" 
