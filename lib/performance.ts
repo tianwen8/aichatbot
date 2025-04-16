@@ -8,8 +8,25 @@ export interface PerformanceMetric {
   metadata?: Record<string, any>;
 }
 
+// Web Vitals 指标
+interface WebVitalsMetric {
+  name: 'FCP' | 'LCP' | 'CLS' | 'FID' | 'TTFB';
+  value: number;
+  rating: 'good' | 'needs-improvement' | 'poor';
+}
+
 // 存储性能指标
 const metrics: PerformanceMetric[] = [];
+const webVitalsMetrics: WebVitalsMetric[] = [];
+
+// 性能指标阈值
+const THRESHOLDS = {
+  FCP: { good: 1800, poor: 3000 },
+  LCP: { good: 2500, poor: 4000 },
+  FID: { good: 100, poor: 300 },
+  CLS: { good: 0.1, poor: 0.25 },
+  TTFB: { good: 800, poor: 1800 }
+};
 
 /**
  * 开始测量性能指标
@@ -27,15 +44,13 @@ export function startMeasure(name: string, metadata?: Record<string, any>): stri
 /**
  * 结束测量性能指标
  */
-export function endMeasure(id: string): PerformanceMetric | undefined {
-  const index = metrics.findIndex(metric => `${metric.name}-${metric.startTime}` === id);
-  if (index !== -1) {
-    const endTime = Date.now();
-    metrics[index].endTime = endTime;
-    metrics[index].duration = endTime - metrics[index].startTime;
-    return metrics[index];
+export function endMeasure(id: string): void {
+  const metric = metrics.find(m => m.name === id.split('-')[0]);
+  if (metric) {
+    metric.endTime = Date.now();
+    metric.duration = metric.endTime - metric.startTime;
+    logMetric(metric.name, metric.duration, metric.metadata);
   }
-  return undefined;
 }
 
 /**
@@ -51,10 +66,36 @@ export function logMetric(name: string, duration: number, metadata?: Record<stri
   };
   metrics.push(metric);
   
-  // 如果持续时间超过1秒，记录性能警告
-  if (duration > 1000) {
+  // 如果持续时间超过阈值，记录性能警告
+  if (duration > THRESHOLDS[name]?.poor || duration > 3000) {
     console.warn(`[Performance Warning] ${name} took ${duration}ms to complete`, metadata);
   }
+}
+
+/**
+ * 记录 Web Vitals 指标
+ */
+export function reportWebVitals(metric: WebVitalsMetric): void {
+  const value = Math.round(metric.value);
+  let rating: 'good' | 'needs-improvement' | 'poor' = 'good';
+  
+  if (value >= THRESHOLDS[metric.name].poor) {
+    rating = 'poor';
+  } else if (value >= THRESHOLDS[metric.name].good) {
+    rating = 'needs-improvement';
+  }
+  
+  webVitalsMetrics.push({
+    name: metric.name,
+    value,
+    rating
+  });
+  
+  // 发送到分析服务
+  console.log(`[Web Vitals] ${metric.name}:`, {
+    value,
+    rating
+  });
 }
 
 /**
@@ -111,4 +152,17 @@ export function measure<T>(
     logMetric(`${name}-error`, duration, { ...metadata, error: String(error) });
     throw error;
   }
+}
+
+/**
+ * 获取性能报告
+ */
+export function getPerformanceReport(): {
+  metrics: PerformanceMetric[];
+  webVitals: WebVitalsMetric[];
+} {
+  return {
+    metrics: metrics.slice(),
+    webVitals: webVitalsMetrics.slice()
+  };
 } 
