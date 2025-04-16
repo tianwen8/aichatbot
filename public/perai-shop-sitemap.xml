@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://perai.xyz</loc>
+    <loc>https://www.perai.shop</loc>
     <lastmod>2025-04-16T00:00:00.000Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://perai.xyz/categories</loc>
+    <loc>https://www.perai.shop/categories</loc>
     <lastmod>2025-04-16T00:00:00.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://perai.xyz/rankings</loc>
+    <loc>https://www.perai.shop/rankings</loc>
     <lastmod>2025-04-16T00:00:00.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://perai.xyz/featured</loc>
+    <loc>https://www.perai.shop/featured</loc>
     <lastmod>2025-04-16T00:00:00.000Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://perai.xyz/submit</loc>
+    <loc>https://www.perai.shop/submit</loc>
     <lastmod>2025-04-16T00:00:00.000Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

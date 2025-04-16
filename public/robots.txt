@@ -2,8 +2,8 @@
 User-agent: *
 Allow: /
 
-# Sitemap location for perai.shop
-Sitemap: https://www.perai.shop/api/sitemap.xml
+# Sitemap location for perai.xyz
+Sitemap: https://perai.xyz/sitemap.xml
 
-# Sitemap location for periai.xyz
-Sitemap: https://periai.xyz/api/sitemap.xml 
+# Sitemap location for perai.shop
+Sitemap: https://www.perai.shop/perai-shop-sitemap.xml 

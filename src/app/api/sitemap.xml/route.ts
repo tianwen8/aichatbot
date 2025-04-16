@@ -5,8 +5,9 @@ import { cookies } from 'next/headers';
 export async function GET(request: Request) {
   // 获取请求的主机名
   const host = request.headers.get('host') || '';
-  // 根据主机名确定使用哪个域名
-  const domainName = host.includes('perai.xyz') ? 'https://periai.xyz' : 'https://www.perai.shop';
+  
+  // 正确的域名是 perai.xyz 而非 periai.xyz
+  const domainName = host.includes('perai.xyz') ? 'https://perai.xyz' : 'https://www.perai.shop';
   
   // 创建Supabase客户端
   const cookieStore = cookies();
@@ -77,6 +78,7 @@ export async function GET(request: Request) {
   return new NextResponse(sitemap, {
     headers: {
       'Content-Type': 'application/xml',
+      'Cache-Control': 'public, max-age=3600',
     },
   });
 } 
