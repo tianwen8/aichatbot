@@ -12,8 +12,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <head>
         <GoogleAnalytics />
+      </head>
+      <body>
         {children}
       </body>
     </html>

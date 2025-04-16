@@ -41,7 +41,7 @@ export async function GET() {
     ? projects.map(
         (project) => `
   <url>
-    <loc>https://www.perai.shop/project/${project.slug}</loc>
+    <loc>https://www.perai.shop/projects/${project.slug}</loc>
     <lastmod>${new Date(project.updated_at || new Date()).toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "AI Character & Virtual Companion Directory - Find Your Perfect AI Partner",
   description: "Discover the best AI characters, virtual companions, and AI girlfriends. Compare and find your ideal AI chat partner for meaningful conversations and companionship.",
-  metadataBase: new URL('https://aichatbot-tianwen8.vercel.app'),
+  metadataBase: new URL('https://www.perai.shop'),
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
           content="AI girlfriend, AI companion, AI waifu, virtual girlfriend, AI characters, chatbots, roleplay, AI lover, digital companion, AI chat partner, AI dating, virtual companionship" 
         />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://aichatbot-tianwen8.vercel.app" />
+        <link rel="canonical" href="https://www.perai.shop" />
         <link rel="icon" href="/logo.ico" />
         <link rel="apple-touch-icon" href="/logo.jpeg" />
         <link rel="icon" type="image/png" sizes="16x16" href="/logo16.png" />
@@ -36,12 +36,12 @@ export default function RootLayout({
         <meta property="og:site_name" content="AI Character & Virtual Companion Directory" />
         <meta property="og:title" content="AI Character & Virtual Companion Directory - Find Your Perfect AI Partner" />
         <meta property="og:description" content="Discover the best AI characters, virtual companions, and AI girlfriends. Compare and find your ideal AI chat partner." />
-        <meta property="og:url" content="https://aichatbot-tianwen8.vercel.app" />
-        <meta property="og:image" content="https://aichatbot-tianwen8.vercel.app/og-image.jpg" />
+        <meta property="og:url" content="https://www.perai.shop" />
+        <meta property="og:image" content="https://www.perai.shop/og-image.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="AI Character & Virtual Companion Directory" />
         <meta name="twitter:description" content="Discover the best AI characters, virtual companions, and AI girlfriends" />
-        <meta name="twitter:image" content="https://aichatbot-tianwen8.vercel.app/og-image.jpg" />
+        <meta name="twitter:image" content="https://www.perai.shop/og-image.jpg" />
         
         {/* JSON-LD structured data */}
         <script
@@ -52,12 +52,12 @@ export default function RootLayout({
               "@type": "WebSite",
               "name": "AI Character & Virtual Companion Directory",
               "description": "Directory of AI characters, virtual companions, and AI girlfriends",
-              "url": "https://aichatbot-tianwen8.vercel.app",
+              "url": "https://www.perai.shop",
               "potentialAction": {
                 "@type": "SearchAction",
                 "target": {
                   "@type": "EntryPoint",
-                  "urlTemplate": "https://aichatbot-tianwen8.vercel.app/search?q={search_term_string}"
+                  "urlTemplate": "https://www.perai.shop/search?q={search_term_string}"
                 },
                 "query-input": "required name=search_term_string"
               }

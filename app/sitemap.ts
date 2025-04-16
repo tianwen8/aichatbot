@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 为所有项目创建URL
   const projectUrls = projects ? projects.map((project) => ({
-    url: `https://aichatbot-tianwen8.vercel.app/projects/${project.slug}`,
+    url: `https://www.perai.shop/projects/${project.slug}`,
     lastModified: new Date(project.updated_at || Date.now()),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
@@ -31,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   // 为所有分类创建URL
   const categoryUrls = Array.from(uniqueCategories).map(category => ({
-    url: `https://aichatbot-tianwen8.vercel.app/categories/${category}`,
+    url: `https://www.perai.shop/categories/${category}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
@@ -40,67 +40,67 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 基本路由
   const routes = [
     {
-      url: 'https://aichatbot-tianwen8.vercel.app',
+      url: 'https://www.perai.shop',
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/submit',
+      url: 'https://www.perai.shop/submit',
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.5,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/categories',
+      url: 'https://www.perai.shop/categories',
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/categories/ai-character',
+      url: 'https://www.perai.shop/categories/ai-character',
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/categories/ai-characters',
+      url: 'https://www.perai.shop/categories/ai-characters',
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/categories/ai-chat',
+      url: 'https://www.perai.shop/categories/ai-chat',
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/categories/ai-tools',
+      url: 'https://www.perai.shop/categories/ai-tools',
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/search',
+      url: 'https://www.perai.shop/search',
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.7,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/new',
+      url: 'https://www.perai.shop/new',
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.8,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/featured',
+      url: 'https://www.perai.shop/featured',
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
-      url: 'https://aichatbot-tianwen8.vercel.app/rankings',
+      url: 'https://www.perai.shop/rankings',
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.7,
